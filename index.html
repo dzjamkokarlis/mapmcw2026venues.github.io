@@ -2,69 +2,142 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Festival Map</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<!-- Google Fonts for web-safe alternatives -->
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
 <style>
-body { display: flex; height: 100vh; margin: 0; font-family: Arial, sans-serif; }
-#map { width: 70%; }
-#list-panel { width: 33%; display: flex; flex-direction: column; background: #f4f1ed; border-left: 1px solid #ccc; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-/* Header - flexible height, no overlap */
+html, body { 
+  height: 100%; 
+  margin: 0; 
+  font-family: 'Open Sans', Arial, sans-serif;
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+body { 
+  display: flex; 
+  flex-direction: column;
+  height: 100vh;
+}
+
+#map { 
+  flex: 1;
+  width: 100%;
+  min-height: 50vh;
+  z-index: 1;
+}
+
+/* Mobile bottom sheet style panel */
+#list-panel { 
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 45vh;
+  background: #f4f1ed;
+  border-top: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+}
+
+#panel-handle {
+  display: flex;
+  justify-content: center;
+  padding: 8px;
+  background: #e8e3ef;
+  border-bottom: 1px solid #ddd;
+  cursor: grab;
+}
+
+#panel-handle::before {
+  content: "";
+  width: 40px;
+  height: 4px;
+  background: #999;
+  border-radius: 2px;
+}
+
+#list-panel.collapsed {
+  transform: translateY(calc(100% - 50px));
+}
+
 #list-header { 
   position: relative; 
   background-size: cover; 
   background-position: center; 
   color: white; 
-  padding: 16px; 
+  padding: 12px 16px; 
   flex-shrink: 0;
 }
-#list-header::before { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.4); }
-#list-header * { position: relative; z-index: 1; }
 
-/* Top section: Title + Logo side by side */
+#list-header::before { 
+  content: ""; 
+  position: absolute; 
+  inset: 0; 
+  background: rgba(0,0,0,0.5); 
+  z-index: 0;
+}
+
+#list-header > * { 
+  position: relative; 
+  z-index: 1; 
+}
+
 #header-top { 
   display: flex; 
   justify-content: space-between; 
   align-items: flex-start; 
-  gap: 16px;
-  margin-bottom: 12px;
+  gap: 12px;
+  margin-bottom: 10px;
 }
+
 #title-section {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
-#logo-slot { width: 120px; height: 60px; flex-shrink: 0; }
-#logo-slot img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
-/* Festival-specific font classes */
+#logo-slot { 
+  width: 100px; 
+  height: 50px; 
+  flex-shrink: 0;
+}
+
+#logo-slot img { 
+  max-width: 100%; 
+  max-height: 100%; 
+  object-fit: contain; 
+}
+
 .font-chamber { font-family: "Gill Sans", "Gill Sans MT", Calibri, sans-serif; }
-.font-masters { font-family: "Clarendon BT", "Clarendon", "Rockwell", "Courier New", serif; font-weight: 700; }
-.font-literary { font-family: "Museo Cyrillic", "Museo", "Open Sans", "Trebuchet MS", sans-serif; font-weight: 500; }
+.font-masters { font-family: "Clarendon BT", "Clarendon", "Rockwell", serif; font-weight: 700; }
+.font-literary { font-family: "Museo", "Open Sans", sans-serif; font-weight: 500; }
 
 #header-title {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   line-height: 1.2;
   text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
 }
+
 #header-subtitle {
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   opacity: 0.9;
-  font-weight: normal;
   text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-  letter-spacing: 0.5px;
 }
 
-/* Button containers - stack vertically with proper spacing */
 #button-container {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-top: 4px;
 }
 
 #festival-buttons { 
@@ -72,85 +145,223 @@ body { display: flex; height: 100vh; margin: 0; font-family: Arial, sans-serif; 
   flex-wrap: wrap;
   gap: 6px; 
 }
+
+/* Touch-friendly buttons - min 44px */
 #festival-buttons button { 
   background: rgba(255,255,255,0.25); 
   border: 1px solid rgba(255,255,255,0.5); 
   color: white; 
-  padding: 6px 12px; 
-  border-radius: 4px; 
+  padding: 10px 14px; 
+  border-radius: 6px; 
   cursor: pointer; 
   font-size: 0.85rem;
+  font-weight: 600;
   transition: all 0.2s;
   white-space: nowrap;
+  min-height: 44px;
+  touch-action: manipulation;
 }
-#festival-buttons button:hover {
-  background: rgba(255,255,255,0.35);
+
+#festival-buttons button:hover,
+#festival-buttons button:active {
+  background: rgba(255,255,255,0.4);
+  transform: scale(0.98);
 }
+
 #festival-buttons button.active { 
-  background: rgba(255,255,255,0.6); 
+  background: rgba(255,255,255,0.8); 
   border-color: white; 
   font-weight: bold; 
   color: #222;
 }
 
-/* Secondary button container */
 #secondary-buttons { 
   display: none; 
+  gap: 8px;
 }
+
 #secondary-buttons.visible { 
   display: flex; 
-  gap: 8px; 
 }
+
 #secondary-buttons button { 
   background: #ff6b6b; 
   border: 1px solid #ff5252; 
   color: white; 
-  padding: 6px 12px; 
-  border-radius: 4px; 
+  padding: 10px 14px; 
+  border-radius: 6px; 
   cursor: pointer; 
   font-weight: bold; 
   font-size: 0.85rem;
-  transition: all 0.2s;
+  min-height: 44px;
+  touch-action: manipulation;
+  flex: 1;
 }
-#secondary-buttons button:hover {
+
+#secondary-buttons button:active {
   background: #ff5252;
-  transform: translateY(-1px);
+  transform: scale(0.98);
 }
+
 #secondary-buttons button.active { 
   background: #ff4757; 
   box-shadow: 0 0 10px rgba(255, 107, 107, 0.5); 
 }
 
-#list { flex: 1; overflow-y: auto; padding: 10px; }
-.location { padding: 12px; border-bottom: 1px solid #ddd; cursor: pointer; transition: background 0.2s; }
-.location:hover { background: #e8e3ef; }
-.location.box-office { background: #fff3cd; border-left: 5px solid #d39e00; font-weight: 600; }
+#list { 
+  flex: 1; 
+  overflow-y: auto; 
+  padding: 8px;
+  -webkit-overflow-scrolling: touch;
+}
 
-/* Fringe venue styling - matches button color */
+.location { 
+  padding: 16px 12px; 
+  border-bottom: 1px solid #ddd; 
+  cursor: pointer; 
+  transition: background 0.2s;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  font-size: 0.95rem;
+}
+
+.location:hover,
+.location:active {
+  background: #e8e3ef;
+}
+
+.location.box-office { 
+  background: #fff3cd; 
+  border-left: 5px solid #d39e00; 
+  font-weight: 600; 
+}
+
 .location.fringe-venue { 
   background: #ffe0e0; 
   border-left: 5px solid #ff6b6b; 
-  color: #333;
 }
-.location.fringe-venue:hover { 
+
+.location.fringe-venue:active { 
   background: #ffd0d0; 
 }
 
-.popup img { width: 100%; margin-top: 8px; border-radius: 4px; cursor: pointer; }
-.popup a { display: inline-block; margin-top: 6px; color: #1a73e8; font-weight: bold; text-decoration: none; }
+.map-controls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  body { flex-direction: column; }
-  #map { width: 100%; height: 50vh; }
-  #list-panel { width: 100%; height: 50vh; border-left: none; border-top: 1px solid #ccc; }
-  #header-title { font-size: 1.3rem; }
+.map-control-btn {
+  width: 44px;
+  height: 44px;
+  background: white;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.map-control-btn:active {
+  background: #f0f0f0;
+  transform: scale(0.95);
+}
+
+.leaflet-popup-content-wrapper {
+  max-width: 280px;
+}
+
+.popup img { 
+  width: 100%; 
+  margin-top: 8px; 
+  border-radius: 4px; 
+  cursor: pointer; 
+}
+
+.popup a { 
+  display: inline-block; 
+  margin-top: 8px; 
+  padding: 10px 16px;
+  background: #1a73e8;
+  color: white;
+  font-weight: bold; 
+  text-decoration: none; 
+  border-radius: 6px;
+  min-height: 44px;
+  line-height: 24px;
+}
+
+.popup a:active {
+  background: #1557b0;
+}
+
+/* Desktop styles */
+@media (min-width: 769px) {
+  body { 
+    flex-direction: row;
+  }
+  
+  #map { 
+    width: 65%; 
+    height: 100vh;
+    min-height: auto;
+  }
+  
+  #list-panel { 
+    position: relative;
+    width: 35%; 
+    height: 100vh;
+    border-top: none;
+    border-left: 1px solid #ccc;
+    box-shadow: none;
+    transform: none !important;
+  }
+  
+  #panel-handle {
+    display: none;
+  }
+  
+  #header-title {
+    font-size: 1.3rem;
+  }
+  
+  .location {
+    padding: 14px 12px;
+  }
+}
+
+@media (max-width: 380px) {
+  #header-title {
+    font-size: 1rem;
+  }
+  
+  #festival-buttons button {
+    padding: 8px 10px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 768px) and (orientation: landscape) {
+  #list-panel {
+    height: 35vh;
+  }
 }
 </style>
 </head>
 <body>
 <div id="map"></div>
+
 <div id="list-panel">
+  <div id="panel-handle"></div>
   <div id="list-header">
     <div id="header-top">
       <div id="title-section">
@@ -165,7 +376,6 @@ body { display: flex; height: 100vh; margin: 0; font-family: Arial, sans-serif; 
         <button data-festival="masters">Masters of Tradition</button>
         <button data-festival="literary">Literary Festival</button>
       </div>
-      <!-- Secondary button for Chamber Music -->
       <div id="secondary-buttons">
         <button id="extra-venues-btn">+ Show Fringe Venues</button>
       </div>
@@ -174,16 +384,19 @@ body { display: flex; height: 100vh; margin: 0; font-family: Arial, sans-serif; 
   <div id="list"></div>
 </div>
 
+<div class="map-controls">
+  <button class="map-control-btn" id="fullscreen-btn" title="Toggle Fullscreen">⛶</button>
+  <button class="map-control-btn" id="locate-btn" title="My Location">📍</button>
+</div>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-/* ========================= CLIPBOARD HELPER ========================= */
 function copyToClipboard(text) {
   navigator.clipboard.writeText(text).then(() => {
     alert("Image address copied");
   });
 }
 
-/* ========================= DATA ========================= */
 const placeholderImage = "https://via.placeholder.com/400x250?text=Venue+Image";
 const festivalData = {
   chamber: {
@@ -207,13 +420,13 @@ const festivalData = {
     extraLocations: [
       { name: "Cork Airport", lat: 51.84907893547716, lng: -8.489884499961821, image: "http://www.corkairport.com/images/default-source/default-album/cork-airport_ext-(11).jpg?sfvrsn=0" },
       { name: "Levis' Corner House, Ballydehob", lat: 51.56261786584987, lng: -9.460362992725443, image: "https://www.westcorkmusic.ie/wp-content/uploads/2022/06/Levis-Corner-House.jpg" },
-      { name: "Wild Atlantic Glamping Bere Island", lat: 51.63931443722968, lng: -9.828050693647242, image: "https://scontent.frix7-1.fna.fbcdn.net/v/t39.30808-6/514283044_1346867140782214_6950704089760388374_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=100&ccb=1-7&_nc_sid=127cfc&_nc_ohc=K7AWJuhmXXwQ7kNvwH2YViG&_nc_oc=AdmVA99LuOqt6nj7wBVffEnFKM95l106ZD2jojnJNuo2JkukWjjZPk3y8LUlX513TO0&_nc_zt=23&_nc_ht=scontent.frix7-1.fna&_nc_gid=qECanTJzSs3J9eHiYAb9og&oh=00_AfqQeo8EgizMZcZZ0EaSgtWoWZgr9f8U_3_W0bX8cK4mRQ&oe=697C476B" },
+      { name: "Wild Atlantic Glamping Bere Island", lat: 51.63931443722968, lng: -9.828050693647242, image: placeholderImage },
       { name: "Durrus Festival Philips Green, Durrus", lat: 51.62201528419279, lng: -9.522333136708495, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/12/venue-philipsgreen-durrus.jpg" },
-      { name: "Uillinn West Cork Arts Centre, Skibbereen", lat: 51.54885618015605, lng: -9.267398339943322, image: "https://scontent.frix7-1.fna.fbcdn.net/v/t39.30808-6/490407769_1276248827844046_135339561640250257_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=127cfc&_nc_ohc=9uOuFkc2nAAQ7kNvwEr7iim&_nc_oc=AdkMhR0fktNUkN6M08_MJ8jF9zBvkViNW12l_DZrld7mhBj-DGyz6B6mO7MOMArtbd0&_nc_zt=23&_nc_ht=scontent.frix7-1.fna&_nc_gid=41_6xoW37VaXdyTRBIiBjw&oh=00_AfpU8ZRok47aj-EJ_KZhMqv14vob_KOPexH9rIeVrgdSnw&oe=697C4B9E" },
+      { name: "Uillinn West Cork Arts Centre, Skibbereen", lat: 51.54885618015605, lng: -9.267398339943322, image: placeholderImage },
       { name: "Amar's Café, Schull", lat: 51.52706766730389, lng: -9.54664737698778, image: "https://www.westcorkmusic.ie/wp-content/uploads/2025/04/Amars-Cafe_low-res.jpg" },
       { name: "Sherkin Island Community Hall", lat: 51.47348470163226, lng: -9.40685703916773, image: placeholderImage },
-      { name: "Two Green Shoots, Glengarriff", lat: 51.77748667310069, lng: -9.56908695929444, image: "https://scontent.frix7-1.fna.fbcdn.net/v/t39.30808-6/514878735_1350011317134463_3326336036776117224_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=127cfc&_nc_ohc=Jb7gzEOJWBQQ7kNvwFdomTa&_nc_oc=AdlG-EflyerTaSrfIIuhPu0wBeHgg-w7JixWsuGA9X_-k4lJiBbwVvPy-yastMAlcXg&_nc_zt=23&_nc_ht=scontent.frix7-1.fna&_nc_gid=GnRrRnqqInz7048BEt3_gw&oh=00_AfqCJxIZMP842SrTV147bZffYYBEJwy9gjnjz-Gbfx3M2w&oe=697C55D6" },
-      { name: "Maritime Hotel, Bantry", lat: 51.68016210654624, lng: -9.457257914368327, image: "https://scontent.frix7-1.fna.fbcdn.net/v/t39.30808-6/490356286_1275752824560313_8487126238001676896_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_ohc=Ulv3mp6pL7IQ7kNvwFpKSG3&_nc_oc=AdlBJdG3rBDfi4BP_I4T8RRZJVoYQO6gMIXoNDfROTcRj_olW8rHVF1TL-R5hGGA55I&_nc_zt=23&_nc_ht=scontent.frix7-1.fna&_nc_gid=rG64l7aZxuxUHCMzYsNE7g&oh=00_AfqCS1ZWtmUEThrX4brW5V8ni90W3J0LIIZ4Cb0BpgrdUw&oe=697C579D" },
+      { name: "Two Green Shoots, Glengarriff", lat: 51.77748667310069, lng: -9.56908695929444, image: placeholderImage },
+      { name: "Maritime Hotel, Bantry", lat: 51.68016210654624, lng: -9.457257914368327, image: placeholderImage },
       { name: "Arundels-by-the-Pier", lat: 51.59999472066557, lng: -9.632374680466265, image: "https://www.westcorkmusic.ie/wp-content/uploads/2022/06/Arundels-by-the-Pier.jpg" },
       { name: "Wolfe Tone Square, Bantry", lat: 51.68053285256902, lng: -9.453626886980139, image: "https://di262mgurvkjm.cloudfront.net/01963fc9-fbab-7af2-a072-6b426a137b00/Bantry_West_Cork_Literaryf_2024_KD_-25_uxga.jpg" },
       { name: "Whiddy Island", lat: 51.69170925129019, lng: -9.490732608889365, image: "https://di262mgurvkjm.cloudfront.net/0197d7ad-6bc9-75cf-ade4-cd141e438ad2/SPEC_WCCMF_2025_day_8_KD_-16_xgaplus.jpg" },
@@ -258,15 +471,22 @@ const festivalData = {
   }
 };
 
-/* ========================= MAP ========================= */
-const map = L.map("map").setView([51.68, -9.45], 13);
+const map = L.map("map", {
+  zoomControl: false,
+  tap: true,
+  touchZoom: true,
+  scrollWheelZoom: false,
+  dragging: true
+}).setView([51.68, -9.45], 13);
+
+L.control.zoom({ position: 'topright' }).addTo(map);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+
 let markers = [];
 let extraMarkers = [];
 let currentFestival = null;
 let showingExtra = false;
 
-/* ========================= POPUP ========================= */
 function popupHTML(loc) {
   const link = `https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}`;
   return `<div class="popup">
@@ -276,33 +496,27 @@ function popupHTML(loc) {
   </div>`;
 }
 
-/* ========================= LOAD FESTIVAL ========================= */
 function loadFestival(key) {
   currentFestival = key;
   const data = festivalData[key];
   
-  // Update header styling
   document.getElementById("list-header").style.backgroundImage = `url(${data.image})`;
   document.getElementById("festival-logo").src = data.logo;
   
-  // Update font class and title
   const titleEl = document.getElementById("header-title");
   titleEl.className = data.fontClass;
   titleEl.textContent = data.name;
   
-  // Clear all markers
   markers.forEach(m => map.removeLayer(m));
   markers = [];
   extraMarkers.forEach(m => map.removeLayer(m));
   extraMarkers = [];
   
-  // Reset extra venues button
   showingExtra = false;
   const extraBtn = document.getElementById("extra-venues-btn");
   extraBtn.textContent = "+ Show Fringe Venues";
   extraBtn.classList.remove("active");
   
-  // Show/hide secondary button based on festival
   const secondaryContainer = document.getElementById("secondary-buttons");
   if (key === "chamber" && data.extraLocations) {
     secondaryContainer.classList.add("visible");
@@ -310,18 +524,15 @@ function loadFestival(key) {
     secondaryContainer.classList.remove("visible");
   }
   
-  // Update active state on main buttons
   document.querySelectorAll("#festival-buttons button").forEach(btn => {
     btn.classList.toggle("active", btn.dataset.festival === key);
   });
   
-  // Populate list
   const list = document.getElementById("list");
   list.innerHTML = "";
   
   const bounds = L.latLngBounds([]);
   
-  // Add main locations
   data.locations.forEach(loc => {
     const marker = L.marker([loc.lat, loc.lng])
       .addTo(map)
@@ -342,16 +553,18 @@ function loadFestival(key) {
       item.classList.add("box-office");
     }
     item.onclick = () => {
-      map.setView([loc.lat, loc.lng], 15);
+      map.setView([loc.lat, loc.lng], 16);
       marker.openPopup();
+      if (window.innerWidth <= 768) {
+        document.getElementById("list-panel").classList.add("collapsed");
+      }
     };
     list.appendChild(item);
   });
   
-  map.fitBounds(bounds, { padding: [40, 40] });
+  map.fitBounds(bounds, { padding: [40, 40], maxZoom: 16 });
 }
 
-/* ========================= TOGGLE EXTRA VENUES ========================= */
 function toggleExtraVenues() {
   const data = festivalData.chamber;
   if (!data.extraLocations) return;
@@ -361,17 +574,13 @@ function toggleExtraVenues() {
   const list = document.getElementById("list");
   
   if (showingExtra) {
-    // Show extra venues
     btn.textContent = "− Hide Fringe Venues";
     btn.classList.add("active");
     
     const bounds = L.latLngBounds([]);
-    
-    // Add bounds from existing markers
     markers.forEach(m => bounds.extend(m.getLatLng()));
     
     data.extraLocations.forEach(loc => {
-      // Create marker with different color (using circle marker for distinction)
       const marker = L.circleMarker([loc.lat, loc.lng], {
         radius: 8,
         fillColor: "#ff6b6b",
@@ -391,41 +600,111 @@ function toggleExtraVenues() {
       extraMarkers.push(marker);
       bounds.extend([loc.lat, loc.lng]);
       
-      // Add to list with fringe-venue class for coral/red highlighting
       const item = document.createElement("div");
       item.className = "location fringe-venue";
       item.textContent = loc.name;
       item.onclick = () => {
-        map.setView([loc.lat, loc.lng], 15);
+        map.setView([loc.lat, loc.lng], 16);
         marker.openPopup();
+        if (window.innerWidth <= 768) {
+          document.getElementById("list-panel").classList.add("collapsed");
+        }
       };
       list.appendChild(item);
     });
     
-    map.fitBounds(bounds, { padding: [40, 40] });
+    map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
     
   } else {
-    // Hide extra venues
     btn.textContent = "+ Show Fringe Venues";
     btn.classList.remove("active");
     
     extraMarkers.forEach(m => map.removeLayer(m));
     extraMarkers = [];
     
-    // Remove fringe venues from list
     const fringeItems = list.querySelectorAll(".fringe-venue");
     fringeItems.forEach(item => item.remove());
   }
 }
 
-/* ========================= EVENT LISTENERS ========================= */
+let isDragging = false;
+let startY = 0;
+let currentY = 0;
+const panel = document.getElementById("list-panel");
+const handle = document.getElementById("panel-handle");
+
+handle.addEventListener("touchstart", (e) => {
+  isDragging = true;
+  startY = e.touches[0].clientY;
+  handle.style.cursor = "grabbing";
+}, { passive: true });
+
+handle.addEventListener("touchmove", (e) => {
+  if (!isDragging) return;
+  currentY = e.touches[0].clientY;
+  const diff = currentY - startY;
+  
+  if (diff > 50) {
+    panel.classList.add("collapsed");
+    isDragging = false;
+  } else if (diff < -50) {
+    panel.classList.remove("collapsed");
+    isDragging = false;
+  }
+}, { passive: true });
+
+handle.addEventListener("touchend", () => {
+  isDragging = false;
+  handle.style.cursor = "grab";
+}, { passive: true });
+
+handle.addEventListener("click", () => {
+  panel.classList.toggle("collapsed");
+});
+
+document.getElementById("fullscreen-btn").onclick = () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+  } else {
+    document.exitFullscreen();
+  }
+};
+
+document.getElementById("locate-btn").onclick = () => {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        map.setView([lat, lng], 14);
+        L.marker([lat, lng], {
+          icon: L.divIcon({
+            className: 'user-location',
+            html: '<div style="background:#1a73e8;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>',
+            iconSize: [22, 22]
+          })
+        }).addTo(map).bindPopup("Your location").openPopup();
+      },
+      (err) => {
+        alert("Unable to get your location");
+      }
+    );
+  }
+};
+
 document.querySelectorAll("#festival-buttons button").forEach(btn => {
   btn.onclick = () => loadFestival(btn.dataset.festival);
 });
 
 document.getElementById("extra-venues-btn").onclick = toggleExtraVenues;
 
-// Initialize
+window.addEventListener("resize", () => {
+  map.invalidateSize();
+  if (window.innerWidth > 768) {
+    panel.classList.remove("collapsed");
+  }
+});
+
 loadFestival("chamber");
 </script>
 </body>

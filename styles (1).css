@@ -1,0 +1,200 @@
+body {
+  display: flex;
+  height: 100vh;
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+#map { width: 70%; }
+
+#list-panel {
+  width: 30%;
+  display: flex;
+  flex-direction: column;
+  background: #f4f1ed;
+  border-left: 1px solid #ccc;
+}
+
+/* Header Layout - Fixed overlap issues */
+#list-header {
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  color: white;
+  padding: 16px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#list-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 0;
+}
+
+#list-header > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Top section: Title + Logo side by side */
+#header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+#title-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+#header-title {
+  margin: 0;
+  font-size: 1.6rem;
+  line-height: 1.2;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+}
+
+#header-subtitle {
+  font-size: 1rem;
+  opacity: 0.9;
+  font-weight: normal;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+  letter-spacing: 0.5px;
+}
+
+#logo-slot { 
+  width: 140px; 
+  height: 70px; 
+  flex-shrink: 0;
+}
+
+#logo-slot img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* Button containers - stacked vertically */
+#button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#festival-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+#festival-buttons button {
+  background: rgba(255,255,255,0.25);
+  border: 1px solid rgba(255,255,255,0.5);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+#festival-buttons button:hover {
+  background: rgba(255,255,255,0.35);
+}
+
+#festival-buttons button.active {
+  background: rgba(255,255,255,0.6);
+  border-color: white;
+  font-weight: bold;
+  color: #222;
+}
+
+/* Secondary buttons container */
+#secondary-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+#outreach-btn,
+#chamber-extra-btn {
+  background: #ff6b6b;
+  border: 1px solid #ff5252;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+#outreach-btn:hover,
+#chamber-extra-btn:hover {
+  background: #ff5252;
+  transform: translateY(-1px);
+}
+
+#outreach-btn.active,
+#chamber-extra-btn.active {
+  background: #ff4757;
+  box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+}
+
+#list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.location {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.location:hover { background: #e8e3ef; }
+
+.location.box-office {
+  background: #fff3cd;
+  border-left: 5px solid #d39e00;
+  font-weight: 600;
+}
+
+/* Fringe/Outreach venue styling */
+.location.fringe-venue {
+  background: #ffe0e0;
+  border-left: 5px solid #ff6b6b;
+  color: #333;
+}
+
+.location.fringe-venue:hover {
+  background: #ffd0d0;
+}
+
+.popup a {
+  display: inline-block;
+  margin-top: 6px;
+  color: #1a73e8;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  body { flex-direction: column; }
+  #map { width: 100%; height: 50vh; }
+  #list-panel { width: 100%; height: 50vh; }
+  #header-title { font-size: 1.3rem; }
+}

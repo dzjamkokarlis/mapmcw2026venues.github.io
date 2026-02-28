@@ -34,7 +34,7 @@ const festivalData = {
       { name: "St Brendans National School Bantry", lat: 51.68151, lng: -9.45476, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/11/venue-stbrendans-school.jpg" },
       { name: "St. Brendan's Church", lat: 51.68093, lng: -9.45309, image: "https://www.westcorkmusic.ie/wp-content/uploads/2024/09/CS-Prog-2024-Uber-Menu.jpg" },
       { name: "Cork County Council, (Courthouse)", lat: 51.68113, lng: -9.45384, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/11/venue-courthouse.jpg" },
-      { name: "Bantry Christian Fellowship Church", lat: 51.67990, lng: -9.45608, image: placeholderImage },
+      { name: "Bantry Christian Fellowship Church", lat: 51.67990, lng: -9.45608, image: https://www.westcorkmusic.ie/wp-content/uploads/2026/02/Christian-Fellowship-church-2026-KD-low-res-scaled.jpg },
       { name: "Bantry pier", lat: 51.68069, lng: -9.46204, image: placeholderImage },
       { name: "Bantry Tourist Information Office", lat: 51.68023, lng: -9.45206, image: "https://di262mgurvkjm.cloudfront.net/01980b2b-c294-71cd-bffb-a18eee038ced/REPRO_FREE_Bantry_wclf_14.07.2025_KD__xgaplus.jpg" },
       { name: "The Brick Oven, Bantry", lat: 51.68040, lng: -9.45508, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/11/venue-the-brick-oven-1.jpg" },
@@ -252,3 +252,4 @@ document.querySelectorAll("#festival-buttons button").forEach(btn => {
 
 /* ========================= INIT ========================= */
 loadFestival("chamber");
+

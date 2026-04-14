@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Festival Map</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <!-- Google Fonts for web-safe alternatives -->
@@ -11,14 +12,19 @@ body { display: flex; height: 100vh; margin: 0; font-family: Arial, sans-serif; 
 #map { width: 70%; }
 #list-panel { width: 33%; display: flex; flex-direction: column; background: #f4f1ed; border-left: 1px solid #ccc; }
 
-/* Header - flexible height, no overlap */
+/* Header - FIXED HEIGHT matching Chamber Festival size */
 #list-header { 
   position: relative; 
   background-size: cover; 
   background-position: center; 
   color: white; 
-  padding: 16px; 
+  padding: 12px 16px; 
   flex-shrink: 0;
+  height: 160px; /* Reduced fixed height - matches Chamber Festival proportion */
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow: hidden; /* Prevents content overflow */
 }
 #list-header::before { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.4); }
 #list-header * { position: relative; z-index: 1; }
@@ -28,16 +34,17 @@ body { display: flex; height: 100vh; margin: 0; font-family: Arial, sans-serif; 
   display: flex; 
   justify-content: space-between; 
   align-items: flex-start; 
-  gap: 16px;
-  margin-bottom: 12px;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-shrink: 0;
 }
 #title-section {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
-#logo-slot { width: 120px; height: 60px; flex-shrink: 0; }
+#logo-slot { width: 100px; height: 50px; flex-shrink: 0; }
 #logo-slot img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
 /* Festival-specific font classes */
@@ -59,27 +66,28 @@ body { display: flex; height: 100vh; margin: 0; font-family: Arial, sans-serif; 
   letter-spacing: 0.5px;
 }
 
-/* Button containers - stack vertically with proper spacing */
+/* Button containers - positioned at bottom */
 #button-container {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 4px;
+  gap: 6px;
+  margin-top: auto; /* Pushes to bottom */
+  flex-shrink: 0;
 }
 
 #festival-buttons { 
   display: flex; 
   flex-wrap: wrap;
-  gap: 6px; 
+  gap: 5px; 
 }
 #festival-buttons button { 
   background: rgba(255,255,255,0.25); 
   border: 1px solid rgba(255,255,255,0.5); 
   color: white; 
-  padding: 6px 12px; 
+  padding: 5px 10px; 
   border-radius: 4px; 
   cursor: pointer; 
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   transition: all 0.2s;
   white-space: nowrap;
 }
@@ -99,17 +107,17 @@ body { display: flex; height: 100vh; margin: 0; font-family: Arial, sans-serif; 
 }
 #secondary-buttons.visible { 
   display: flex; 
-  gap: 8px; 
+  gap: 6px; 
 }
 #secondary-buttons button { 
   background: #ff6b6b; 
   border: 1px solid #ff5252; 
   color: white; 
-  padding: 6px 12px; 
+  padding: 5px 10px; 
   border-radius: 4px; 
   cursor: pointer; 
   font-weight: bold; 
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   transition: all 0.2s;
 }
 #secondary-buttons button:hover {
@@ -144,7 +152,26 @@ body { display: flex; height: 100vh; margin: 0; font-family: Arial, sans-serif; 
   body { flex-direction: column; }
   #map { width: 100%; height: 50vh; }
   #list-panel { width: 100%; height: 50vh; border-left: none; border-top: 1px solid #ccc; }
-  #header-title { font-size: 1.3rem; }
+  
+  /* Mobile: Compact header */
+  #list-header {
+    height: 130px;
+    padding: 10px 12px;
+  }
+  
+  #header-title { font-size: 1rem; }
+  #header-subtitle { font-size: 0.8rem; }
+  #logo-slot { width: 80px; height: 40px; }
+  
+  #festival-buttons button {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+  
+  #secondary-buttons button {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
 }
 </style>
 </head>
@@ -200,14 +227,16 @@ const festivalData = {
       { name: "Bantry Tourist Information Office", lat: 51.68020080895369, lng: -9.452257798189326, image: "https://di262mgurvkjm.cloudfront.net/01980b2b-c294-71cd-bffb-a18eee038ced/REPRO_FREE_Bantry_wclf_14.07.2025_KD__xgaplus.jpg" },
       { name: "The Brick Oven, Bantry", lat: 51.6803958090618, lng: -9.45507917673037, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/11/venue-the-brick-oven-1.jpg" },
       { name: "The Maritime Hotel, Bantry", lat: 51.680142214673765, lng: -9.457270046457491, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/11/venue-maritime-hotel-1.jpg" },
-      { name: "Bantry House", lat: 51.677507790279954, lng: -9.46437614203052, image: "https://www.westcorkmusic.ie/wp-content/uploads/2019/03/Bantry-House-Gardens.jpg" },
+      { name: "Bantry House", lat: 51.677507790279954, lng: -9.46437614203052, image: "https://www.westcorkmusic.ie/wp-content/uploads/2026/04/Nicholas-O_Donnell-Bantry-House.jpg" },
       { name: "Marino Church, Bantry", lat: 51.68053728946514, lng: -9.45178212483789, image: "https://www.westcorkmusic.ie/wp-content/uploads/2022/08/Marino-Old-Methodist-Church.jpg" },
+	  { name: "Curious Keys (Above Forest & Flock) ", lat: 51.67948544393831, lng: -9.451138510381346, image: "https://www.westcorkmusic.ie/wp-content/uploads/2026/04/Bantry_West_Cork_Literaryf_2024_KD_-25_uxga-1.jpg" },
       { name: "West Cork Music Box Office [BOX OFFICE]", lat: 51.68051340859633, lng: -9.448561083049437, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/11/wcm-office-2024.jpg" }
     ],
     extraLocations: [
       { name: "Cork Airport", lat: 51.84907893547716, lng: -8.489884499961821, image: "http://www.corkairport.com/images/default-source/default-album/cork-airport_ext-(11).jpg?sfvrsn=0" },
+	  { name: "Club Chléire, Cape Clear", lat: 51.43950878949699, lng: -9.504359703586173, image: "https://www.westcorkmusic.ie/wp-content/uploads/2026/04/Cape-Clear-image.png" },
       { name: "Levis' Corner House, Ballydehob", lat: 51.56261786584987, lng: -9.460362992725443, image: "https://www.westcorkmusic.ie/wp-content/uploads/2022/06/Levis-Corner-House.jpg" },
-      { name: "Wild Atlantic Glamping Bere Island", lat: 51.63931443722968, lng: -9.828050693647242, image: "https://scontent.frix7-1.fna.fbcdn.net/v/t39.30808-6/514283044_1346867140782214_6950704089760388374_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=100&ccb=1-7&_nc_sid=127cfc&_nc_ohc=K7AWJuhmXXwQ7kNvwH2YViG&_nc_oc=AdmVA99LuOqt6nj7wBVffEnFKM95l106ZD2jojnJNuo2JkukWjjZPk3y8LUlX513TO0&_nc_zt=23&_nc_ht=scontent.frix7-1.fna&_nc_gid=qECanTJzSs3J9eHiYAb9og&oh=00_AfqQeo8EgizMZcZZ0EaSgtWoWZgr9f8U_3_W0bX8cK4mRQ&oe=697C476B" },
+      { name: "Sarah Walker Gallery, Castletownbere", lat: 51.65030131082788, lng: -9.911526434099049, image: "https://www.westcorkmusic.ie/wp-content/uploads/2019/06/venue-sarah-walker-gallery-2.jpg" },
       { name: "Durrus Festival Philips Green, Durrus", lat: 51.62201528419279, lng: -9.522333136708495, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/12/venue-philipsgreen-durrus.jpg" },
       { name: "Uillinn West Cork Arts Centre, Skibbereen", lat: 51.54885618015605, lng: -9.267398339943322, image: "https://scontent.frix7-1.fna.fbcdn.net/v/t39.30808-6/490407769_1276248827844046_135339561640250257_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=127cfc&_nc_ohc=9uOuFkc2nAAQ7kNvwEr7iim&_nc_oc=AdkMhR0fktNUkN6M08_MJ8jF9zBvkViNW12l_DZrld7mhBj-DGyz6B6mO7MOMArtbd0&_nc_zt=23&_nc_ht=scontent.frix7-1.fna&_nc_gid=41_6xoW37VaXdyTRBIiBjw&oh=00_AfpU8ZRok47aj-EJ_KZhMqv14vob_KOPexH9rIeVrgdSnw&oe=697C4B9E" },
       { name: "Amar's Café, Schull", lat: 51.52706766730389, lng: -9.54664737698778, image: "https://www.westcorkmusic.ie/wp-content/uploads/2025/04/Amars-Cafe_low-res.jpg" },
@@ -216,14 +245,15 @@ const festivalData = {
       { name: "Maritime Hotel, Bantry", lat: 51.68016210654624, lng: -9.457257914368327, image: "https://scontent.frix7-1.fna.fbcdn.net/v/t39.30808-6/490356286_1275752824560313_8487126238001676896_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_ohc=Ulv3mp6pL7IQ7kNvwFpKSG3&_nc_oc=AdlBJdG3rBDfi4BP_I4T8RRZJVoYQO6gMIXoNDfROTcRj_olW8rHVF1TL-R5hGGA55I&_nc_zt=23&_nc_ht=scontent.frix7-1.fna&_nc_gid=rG64l7aZxuxUHCMzYsNE7g&oh=00_AfqCS1ZWtmUEThrX4brW5V8ni90W3J0LIIZ4Cb0BpgrdUw&oe=697C579D" },
       { name: "Arundels-by-the-Pier", lat: 51.59999472066557, lng: -9.632374680466265, image: "https://www.westcorkmusic.ie/wp-content/uploads/2022/06/Arundels-by-the-Pier.jpg" },
       { name: "Wolfe Tone Square, Bantry", lat: 51.68053285256902, lng: -9.453626886980139, image: "https://di262mgurvkjm.cloudfront.net/01963fc9-fbab-7af2-a072-6b426a137b00/Bantry_West_Cork_Literaryf_2024_KD_-25_uxga.jpg" },
-      { name: "Whiddy Island", lat: 51.69170925129019, lng: -9.490732608889365, image: "https://di262mgurvkjm.cloudfront.net/0197d7ad-6bc9-75cf-ade4-cd141e438ad2/SPEC_WCCMF_2025_day_8_KD_-16_xgaplus.jpg" },
+	  { name: "Marino Church, Bantry", lat: 51.68053728946514, lng: -9.45178212483789, image: "https://www.westcorkmusic.ie/wp-content/uploads/2022/08/Marino-Old-Methodist-Church.jpg" },
+	  { name: "Whiddy Island", lat: 51.68816647156622, lng: -9.491943915558602, image: "https://www.westcorkmusic.ie/wp-content/uploads/2026/04/MOT_22.08.2025_KD-22_xgaplus.jpg" },
       { name: "Heir Island (Take the ferry from Cunnamore Point)", lat: 51.49481839448013, lng: -9.439318239788358, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/11/12.-Magnolia-Quartet-on-Heir-Island_c.Maria-Sheil-2-2048x1386.jpeg" }
     ]
   },
   masters: {
     name: "Masters of Tradition",
     fontClass: "font-masters",
-    image: "https://www.westcorkmusic.ie/wp-content/uploads/2026/01/WCM-Website-banners-3.jpg",
+    image: "https://www.westcorkmusic.ie/wp-content/uploads/2026/04/C0326-MASTERS-26-YT-1920X1080-23032.jpg",
     logo: "https://www.westcorkmusic.ie/wp-content/uploads/2024/04/MOT-Logo-2024-158-px-x-70-px.png",
     locations: [
       { name: "St. Brendan's Church", lat: 51.68092352594685, lng: -9.453272648886415, image: "https://di262mgurvkjm.cloudfront.net/01970eef-2f33-7f3b-ba74-3eaeb4a5b6b6/DJI_0272_xlarge.jpg" },
@@ -231,6 +261,7 @@ const festivalData = {
       { name: "Maritime Hotel, Bantry", lat: 51.68120, lng: -9.457185745588363, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/11/venue-maritime-hotel-1.jpg" },
       { name: "Marino Church, Bantry", lat: 51.68055452005309, lng: -9.451873316297892, image: "https://di262mgurvkjm.cloudfront.net/01963c0c-f3ff-7f31-b44b-0facabbebc82/Bantry_west_cork_literary_2025_KD_-28_uxga.jpg" },
       { name: "Bantry Pier", lat: 51.68067621775035, lng: -9.462015915543367, image: placeholderImage },
+	  { name: "Whiddy Island", lat: 51.68816647156622, lng: -9.491943915558602, image: "https://www.westcorkmusic.ie/wp-content/uploads/2026/04/MOT_22.08.2025_KD-22_xgaplus.jpg" },
       { name: "Future Forests", lat: 51.78700, lng: -9.47300, image: "https://www.westcorkmusic.ie/wp-content/uploads/2022/07/Future-Forests-2.jpg" },
       { name: "West Cork Music Box Office [BOX OFFICE]", lat: 51.68400, lng: -9.44900, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/11/wcm-office-2024.jpg" }
     ]
@@ -246,13 +277,16 @@ const festivalData = {
       { name: "Bantry House", lat: 51.677507790279954, lng: -9.46437614203052, image: "https://www.bantry.ie/wp-content/uploads/Bantry-House-3.jpg" },
       { name: "Maritime Hotel, Bantry", lat: 51.680207147514025, lng: -9.457185745588363, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/11/venue-maritime-hotel-1.jpg" },
       { name: "St Brendans School Hall", lat: 51.68145405559759, lng: -9.454600199562845, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/11/venue-stbrendans-school.jpg" },
-      { name: "National Learning Network, Bantry", lat: 51.69961003492131, lng: -9.442026764671246, image: "https://www.westcorkmusic.ie/wp-content/uploads/2019/02/1-venues-nlnbantry.jpg" },
+	  { name: "St. Brendan's Church", lat: 51.68092352594685, lng: -9.453272648886415, image: "https://di262mgurvkjm.cloudfront.net/01970eef-2f33-7f3b-ba74-3eaeb4a5b6b6/DJI_0272_xlarge.jpg" },
+      { name: "Curious Keys (Above Forest & Flock) ", lat: 51.67948544393831, lng: -9.451138510381346, image: "https://www.westcorkmusic.ie/wp-content/uploads/2026/04/Bantry_West_Cork_Literaryf_2024_KD_-25_uxga-1.jpg" },
       { name: "Future Forests", lat: 51.78700, lng: -9.47300, image: "https://www.westcorkmusic.ie/wp-content/uploads/2022/07/Future-Forests-2.jpg" },
       { name: "Marino Church, Bantry", lat: 51.68055452005309, lng: -9.451873316297892, image: "https://www.westcorkmusic.ie/wp-content/uploads/2022/08/Marino-Old-Methodist-Church.jpg" },
       { name: "Ma Murphy's Bar, Bantry", lat: 51.67947496316963, lng: -9.450857572290625, image: "https://di262mgurvkjm.cloudfront.net/019805e5-de15-72e9-968f-c6b4997fd3f8/REPRO_FREE_Bantry_wclf_13.07.2025_KD_-29_xgaplus.jpg" },
       { name: "Bantry Library", lat: 51.67849899238629, lng: -9.449377866282619, image: "https://www.westcorkmusic.ie/wp-content/uploads/2024/08/DSC_1827.jpg" },
-      { name: "St Finbarr's Boys School, Bantry", lat: 51.67694029272779, lng: -9.441044480425049, image: "https://www.westcorkmusic.ie/wp-content/uploads/2023/03/St-Finbarres-Boys-NS.jpeg" },
+      { name: "Bantry Christian Fellowship Church", lat: 51.67990, lng: -9.45608, image: "https://www.westcorkmusic.ie/wp-content/uploads/2026/02/Christian-Fellowship-church-2026-KD-low-res-scaled.jpg" },
       { name: "Bantry Bookshop", lat: 51.67969046251881, lng: -9.452045862683947, image: "https://di262mgurvkjm.cloudfront.net/01963c33-e981-730a-87c4-58ec197f5703/Bantry_west_cork_literary_2025_KD_-4_bigthumb.jpg" },
+	  { name: "Whiddy Island", lat: 51.68816647156622, lng: -9.491943915558602, image: "https://www.westcorkmusic.ie/wp-content/uploads/2026/04/MOT_22.08.2025_KD-22_xgaplus.jpg" },
+	  { name: "Cork County Council, (Courthouse)", lat: 51.68113143041356, lng: -9.45383702947407, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/11/venue-courthouse.jpg" },
       { name: "West Cork Music Box Office [BOX OFFICE]", lat: 51.68400, lng: -9.44900, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/11/wcm-office-2024.jpg" }
     ]
   }
@@ -430,5 +464,3 @@ loadFestival("chamber");
 </script>
 </body>
 </html>
-
-

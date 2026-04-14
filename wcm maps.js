@@ -131,7 +131,18 @@ function loadFestival(key) {
   document.getElementById("festival-logo").src = data.logo;
   document.getElementById("header-title").textContent = data.name;
   document.getElementById("header-subtitle").textContent = "2026 Festival Venues";
-  document.getElementById("list-header").style.backgroundImage = `url(${data.image})`;
+  
+  // === UPDATED: Store header element and toggle literary blur mode ===
+  const headerEl = document.getElementById("list-header");
+  headerEl.style.backgroundImage = `url(${data.image})`;
+  
+  // Toggle literary blur gradient effect
+  if (key === "literary") {
+    headerEl.classList.add("literary-mode");
+  } else {
+    headerEl.classList.remove("literary-mode");
+  }
+  // === END UPDATE ===
 
   // Clear and rebuild secondary buttons container
   const secondaryContainer = document.getElementById("secondary-buttons");
@@ -252,5 +263,3 @@ document.querySelectorAll("#festival-buttons button").forEach(btn => {
 
 /* ========================= INIT ========================= */
 loadFestival("chamber");
-
-

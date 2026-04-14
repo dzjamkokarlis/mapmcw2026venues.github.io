@@ -8,11 +8,47 @@
 <!-- Google Fonts for web-safe alternatives -->
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
 <style>
-body { display: flex; height: 100vh; margin: 0; font-family: Arial, sans-serif; }
-#map { width: 70%; }
-#list-panel { width: 33%; display: flex; flex-direction: column; background: #f4f1ed; border-left: 1px solid #ccc; }
+/* Map container - needed for absolute positioning of fringe button */
+#map {
+  width: 70%;
+  position: relative;
+}
 
-/* Header - FIXED HEIGHT matching Chamber Festival size */
+/* Map Fringe Button - Top Right Corner */
+#map-fringe-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  background: #ff6b6b;
+  border: 2px solid #fff;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.85rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  transition: all 0.2s;
+  display: none;
+}
+
+#map-fringe-btn.visible {
+  display: block;
+}
+
+#map-fringe-btn.active {
+  background: #ff4757;
+  box-shadow: 0 0 15px rgba(255, 107, 107, 0.6);
+}
+
+#map-fringe-btn:hover {
+  background: #ff5252;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+/* Header - FIXED HEIGHT */
 #list-header { 
   position: relative; 
   background-size: cover; 
@@ -20,14 +56,39 @@ body { display: flex; height: 100vh; margin: 0; font-family: Arial, sans-serif; 
   color: white; 
   padding: 12px 16px; 
   flex-shrink: 0;
-  height: 160px; /* Reduced fixed height - matches Chamber Festival proportion */
+  height: 160px;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  overflow: hidden; /* Prevents content overflow */
+  overflow: hidden;
 }
-#list-header::before { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.4); }
-#list-header * { position: relative; z-index: 1; }
+#list-header::before { 
+  content: ""; 
+  position: absolute; 
+  inset: 0; 
+  background: rgba(0,0,0,0.4); 
+}
+#list-header * { 
+  position: relative; 
+  z-index: 1; 
+}
+
+/* Literary Festival Blur Gradient Effect */
+#list-header.literary-mode::before {
+  background: rgba(0,0,0,0.15);
+}
+
+#list-header.literary-mode::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: linear-gradient(to left, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.2) 50%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0) 100%);
+  mask-image: linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0) 100%);
+  z-index: 0;
+}
 
 /* Top section: Title + Logo side by side */
 #header-top { 
@@ -44,13 +105,29 @@ body { display: flex; height: 100vh; margin: 0; font-family: Arial, sans-serif; 
   flex-direction: column;
   gap: 2px;
 }
-#logo-slot { width: 100px; height: 50px; flex-shrink: 0; }
-#logo-slot img { max-width: 100%; max-height: 100%; object-fit: contain; }
+#logo-slot { 
+  width: 100px; 
+  height: 50px; 
+  flex-shrink: 0; 
+}
+#logo-slot img { 
+  max-width: 100%; 
+  max-height: 100%; 
+  object-fit: contain; 
+}
 
 /* Festival-specific font classes */
-.font-chamber { font-family: "Gill Sans", "Gill Sans MT", Calibri, sans-serif; }
-.font-masters { font-family: "Clarendon BT", "Clarendon", "Rockwell", "Courier New", serif; font-weight: 700; }
-.font-literary { font-family: "Museo Cyrillic", "Museo", "Open Sans", "Trebuchet MS", sans-serif; font-weight: 500; }
+.font-chamber { 
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, sans-serif; 
+}
+.font-masters { 
+  font-family: "Clarendon BT", "Clarendon", "Rockwell", "Courier New", serif; 
+  font-weight: 700; 
+}
+.font-literary { 
+  font-family: "Museo Cyrillic", "Museo", "Open Sans", "Trebuchet MS", sans-serif; 
+  font-weight: 500; 
+}
 
 #header-title {
   margin: 0;
@@ -71,7 +148,7 @@ body { display: flex; height: 100vh; margin: 0; font-family: Arial, sans-serif; 
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-top: auto; /* Pushes to bottom */
+  margin-top: auto;
   flex-shrink: 0;
 }
 
@@ -101,40 +178,35 @@ body { display: flex; height: 100vh; margin: 0; font-family: Arial, sans-serif; 
   color: #222;
 }
 
-/* Secondary button container */
-#secondary-buttons { 
-  display: none; 
-}
-#secondary-buttons.visible { 
+/* List panel */
+#list-panel { 
+  width: 33%; 
   display: flex; 
-  gap: 6px; 
+  flex-direction: column; 
+  background: #f4f1ed; 
+  border-left: 1px solid #ccc; 
 }
-#secondary-buttons button { 
-  background: #ff6b6b; 
-  border: 1px solid #ff5252; 
-  color: white; 
-  padding: 2px 6px; 
-  border-radius: 4px; 
+#list { 
+  flex: 1; 
+  overflow-y: auto; 
+  padding: 10px; 
+}
+
+/* Location items */
+.location { 
+  padding: 12px; 
+  border-bottom: 1px solid #ddd; 
   cursor: pointer; 
-  font-weight: bold; 
-  font-size: 0.8rem;
-  transition: all 0.2s;
+  transition: background 0.2s; 
 }
-#secondary-buttons button:hover {
-  background: #ff5252;
-  transform: translateY(-1px);
+.location:hover { 
+  background: #e8e3ef; 
 }
-#secondary-buttons button.active { 
-  background: #ff4757; 
-  box-shadow: 0 0 10px rgba(255, 107, 107, 0.5); 
+.location.box-office { 
+  background: #fff3cd; 
+  border-left: 5px solid #d39e00; 
+  font-weight: 600; 
 }
-
-#list { flex: 1; overflow-y: auto; padding: 10px; }
-.location { padding: 12px; border-bottom: 1px solid #ddd; cursor: pointer; transition: background 0.2s; }
-.location:hover { background: #e8e3ef; }
-.location.box-office { background: #fff3cd; border-left: 5px solid #d39e00; font-weight: 600; }
-
-/* Fringe venue styling - matches button color */
 .location.fringe-venue { 
   background: #ffe0e0; 
   border-left: 5px solid #ff6b6b; 
@@ -144,40 +216,81 @@ body { display: flex; height: 100vh; margin: 0; font-family: Arial, sans-serif; 
   background: #ffd0d0; 
 }
 
-.popup img { width: 100%; margin-top: 8px; border-radius: 4px; cursor: pointer; }
-.popup a { display: inline-block; margin-top: 6px; color: #1a73e8; font-weight: bold; text-decoration: none; }
+/* Popup styles */
+.popup img { 
+  width: 100%; 
+  margin-top: 8px; 
+  border-radius: 4px; 
+  cursor: pointer; 
+}
+.popup a { 
+  display: inline-block; 
+  margin-top: 6px; 
+  color: #1a73e8; 
+  font-weight: bold; 
+  text-decoration: none; 
+}
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  body { flex-direction: column; }
-  #map { width: 100%; height: 50vh; }
-  #list-panel { width: 100%; height: 50vh; border-left: none; border-top: 1px solid #ccc; }
+/* Base body styles */
+body { 
+  display: flex; 
+  height: 100vh; 
+  margin: 0; 
+  font-family: Arial, sans-serif; 
+}
+
+/* Responsive adjustments - matches iframe breakpoint of 868px */
+@media (max-width: 868px) {
+  body { 
+    flex-direction: column; 
+  }
+  #map { 
+    width: 100%; 
+    height: 45vh;
+  }
+  #list-panel { 
+    width: 100%; 
+    height: 45vh;
+    border-left: none; 
+    border-top: 1px solid #ccc; 
+  }
   
   /* Mobile: Compact header */
   #list-header {
     height: 130px;
     padding: 10px 12px;
   }
-  
-  #header-title { font-size: 1rem; }
-  #header-subtitle { font-size: 0.8rem; }
-  #logo-slot { width: 80px; height: 40px; }
+  #header-title { 
+    font-size: 1rem; 
+  }
+  #header-subtitle { 
+    font-size: 0.8rem; 
+  }
+  #logo-slot { 
+    width: 80px; 
+    height: 40px; 
+  }
   
   #festival-buttons button {
     padding: 2px 6px;
     font-size: 0.75rem;
   }
   
-  #secondary-buttons button {
-    padding: 2px 6px;
-    font-size: 0.75rem;
+  /* Mobile: Map fringe button adjustments */
+  #map-fringe-btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    top: 8px;
+    right: 8px;
   }
 }
 </style>
 <link href="styles (1n).css" rel="stylesheet" type="text/css">
 </head>
 <body>
-<div id="map"></div>
+<div id="map">
+  <button id="map-fringe-btn">+ Show Fringe Venues</button>
+</div>
 <div id="list-panel">
   <div id="list-header">
     <div id="header-top">
@@ -192,10 +305,6 @@ body { display: flex; height: 100vh; margin: 0; font-family: Arial, sans-serif; 
         <button data-festival="chamber" class="active">Chamber Festival</button>
         <button data-festival="masters">Masters of Tradition</button>
         <button data-festival="literary">Literary Festival</button>
-      </div>
-      <!-- Secondary button for Chamber Music -->
-      <div id="secondary-buttons">
-        <button id="extra-venues-btn">+ Show Fringe Venues</button>
       </div>
     </div>
   </div>
@@ -230,12 +339,12 @@ const festivalData = {
       { name: "The Maritime Hotel, Bantry", lat: 51.680142214673765, lng: -9.457270046457491, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/11/venue-maritime-hotel-1.jpg" },
       { name: "Bantry House", lat: 51.677507790279954, lng: -9.46437614203052, image: "https://www.westcorkmusic.ie/wp-content/uploads/2026/04/Nicholas-O_Donnell-Bantry-House.jpg" },
       { name: "Marino Church, Bantry", lat: 51.68053728946514, lng: -9.45178212483789, image: "https://www.westcorkmusic.ie/wp-content/uploads/2022/08/Marino-Old-Methodist-Church.jpg" },
-	  { name: "Curious Keys (Above Forest & Flock) ", lat: 51.67948544393831, lng: -9.451138510381346, image: "https://www.westcorkmusic.ie/wp-content/uploads/2026/04/Bantry_West_Cork_Literaryf_2024_KD_-25_uxga-1.jpg" },
+      { name: "Curious Keys (Above Forest & Flock) ", lat: 51.67948544393831, lng: -9.451138510381346, image: "https://www.westcorkmusic.ie/wp-content/uploads/2026/04/Bantry_West_Cork_Literaryf_2024_KD_-25_uxga-1.jpg" },
       { name: "West Cork Music Box Office [BOX OFFICE]", lat: 51.68051340859633, lng: -9.448561083049437, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/11/wcm-office-2024.jpg" }
     ],
     extraLocations: [
       { name: "Cork Airport", lat: 51.84907893547716, lng: -8.489884499961821, image: "http://www.corkairport.com/images/default-source/default-album/cork-airport_ext-(11).jpg?sfvrsn=0" },
-	  { name: "Club Chléire, Cape Clear", lat: 51.43950878949699, lng: -9.504359703586173, image: "https://www.westcorkmusic.ie/wp-content/uploads/2026/04/Cape-Clear-image.png" },
+      { name: "Club Chléire, Cape Clear", lat: 51.43950878949699, lng: -9.504359703586173, image: "https://www.westcorkmusic.ie/wp-content/uploads/2026/04/Cape-Clear-image.png" },
       { name: "Levis' Corner House, Ballydehob", lat: 51.56261786584987, lng: -9.460362992725443, image: "https://www.westcorkmusic.ie/wp-content/uploads/2022/06/Levis-Corner-House.jpg" },
       { name: "Sarah Walker Gallery, Castletownbere", lat: 51.65030131082788, lng: -9.911526434099049, image: "https://www.westcorkmusic.ie/wp-content/uploads/2019/06/venue-sarah-walker-gallery-2.jpg" },
       { name: "Durrus Festival Philips Green, Durrus", lat: 51.62201528419279, lng: -9.522333136708495, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/12/venue-philipsgreen-durrus.jpg" },
@@ -246,8 +355,8 @@ const festivalData = {
       { name: "Maritime Hotel, Bantry", lat: 51.68016210654624, lng: -9.457257914368327, image: "https://scontent.frix7-1.fna.fbcdn.net/v/t39.30808-6/490356286_1275752824560313_8487126238001676896_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_ohc=Ulv3mp6pL7IQ7kNvwFpKSG3&_nc_oc=AdlBJdG3rBDfi4BP_I4T8RRZJVoYQO6gMIXoNDfROTcRj_olW8rHVF1TL-R5hGGA55I&_nc_zt=23&_nc_ht=scontent.frix7-1.fna&_nc_gid=rG64l7aZxuxUHCMzYsNE7g&oh=00_AfqCS1ZWtmUEThrX4brW5V8ni90W3J0LIIZ4Cb0BpgrdUw&oe=697C579D" },
       { name: "Arundels-by-the-Pier", lat: 51.59999472066557, lng: -9.632374680466265, image: "https://www.westcorkmusic.ie/wp-content/uploads/2022/06/Arundels-by-the-Pier.jpg" },
       { name: "Wolfe Tone Square, Bantry", lat: 51.68053285256902, lng: -9.453626886980139, image: "https://di262mgurvkjm.cloudfront.net/01963fc9-fbab-7af2-a072-6b426a137b00/Bantry_West_Cork_Literaryf_2024_KD_-25_uxga.jpg" },
-	  { name: "Marino Church, Bantry", lat: 51.68053728946514, lng: -9.45178212483789, image: "https://www.westcorkmusic.ie/wp-content/uploads/2022/08/Marino-Old-Methodist-Church.jpg" },
-	  { name: "Whiddy Island", lat: 51.68816647156622, lng: -9.491943915558602, image: "https://www.westcorkmusic.ie/wp-content/uploads/2026/04/MOT_22.08.2025_KD-22_xgaplus.jpg" },
+      { name: "Marino Church, Bantry", lat: 51.68053728946514, lng: -9.45178212483789, image: "https://www.westcorkmusic.ie/wp-content/uploads/2022/08/Marino-Old-Methodist-Church.jpg" },
+      { name: "Whiddy Island", lat: 51.68816647156622, lng: -9.491943915558602, image: "https://www.westcorkmusic.ie/wp-content/uploads/2026/04/MOT_22.08.2025_KD-22_xgaplus.jpg" },
       { name: "Heir Island (Take the ferry from Cunnamore Point)", lat: 51.49481839448013, lng: -9.439318239788358, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/11/12.-Magnolia-Quartet-on-Heir-Island_c.Maria-Sheil-2-2048x1386.jpeg" }
     ]
   },
@@ -262,7 +371,7 @@ const festivalData = {
       { name: "Maritime Hotel, Bantry", lat: 51.68120, lng: -9.457185745588363, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/11/venue-maritime-hotel-1.jpg" },
       { name: "Marino Church, Bantry", lat: 51.68055452005309, lng: -9.451873316297892, image: "https://di262mgurvkjm.cloudfront.net/01963c0c-f3ff-7f31-b44b-0facabbebc82/Bantry_west_cork_literary_2025_KD_-28_uxga.jpg" },
       { name: "Bantry Pier", lat: 51.68067621775035, lng: -9.462015915543367, image: placeholderImage },
-	  { name: "Whiddy Island", lat: 51.68816647156622, lng: -9.491943915558602, image: "https://www.westcorkmusic.ie/wp-content/uploads/2026/04/MOT_22.08.2025_KD-22_xgaplus.jpg" },
+      { name: "Whiddy Island", lat: 51.68816647156622, lng: -9.491943915558602, image: "https://www.westcorkmusic.ie/wp-content/uploads/2026/04/MOT_22.08.2025_KD-22_xgaplus.jpg" },
       { name: "Future Forests", lat: 51.78700, lng: -9.47300, image: "https://www.westcorkmusic.ie/wp-content/uploads/2022/07/Future-Forests-2.jpg" },
       { name: "West Cork Music Box Office [BOX OFFICE]", lat: 51.68400, lng: -9.44900, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/11/wcm-office-2024.jpg" }
     ]
@@ -278,7 +387,7 @@ const festivalData = {
       { name: "Bantry House", lat: 51.677507790279954, lng: -9.46437614203052, image: "https://www.bantry.ie/wp-content/uploads/Bantry-House-3.jpg" },
       { name: "Maritime Hotel, Bantry", lat: 51.680207147514025, lng: -9.457185745588363, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/11/venue-maritime-hotel-1.jpg" },
       { name: "St Brendans School Hall", lat: 51.68145405559759, lng: -9.454600199562845, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/11/venue-stbrendans-school.jpg" },
-	  { name: "St. Brendan's Church", lat: 51.68092352594685, lng: -9.453272648886415, image: "https://di262mgurvkjm.cloudfront.net/01970eef-2f33-7f3b-ba74-3eaeb4a5b6b6/DJI_0272_xlarge.jpg" },
+      { name: "St. Brendan's Church", lat: 51.68092352594685, lng: -9.453272648886415, image: "https://di262mgurvkjm.cloudfront.net/01970eef-2f33-7f3b-ba74-3eaeb4a5b6b6/DJI_0272_xlarge.jpg" },
       { name: "Curious Keys (Above Forest & Flock) ", lat: 51.67948544393831, lng: -9.451138510381346, image: "https://www.westcorkmusic.ie/wp-content/uploads/2026/04/Bantry_West_Cork_Literaryf_2024_KD_-25_uxga-1.jpg" },
       { name: "Future Forests", lat: 51.78700, lng: -9.47300, image: "https://www.westcorkmusic.ie/wp-content/uploads/2022/07/Future-Forests-2.jpg" },
       { name: "Marino Church, Bantry", lat: 51.68055452005309, lng: -9.451873316297892, image: "https://www.westcorkmusic.ie/wp-content/uploads/2022/08/Marino-Old-Methodist-Church.jpg" },
@@ -286,8 +395,8 @@ const festivalData = {
       { name: "Bantry Library", lat: 51.67849899238629, lng: -9.449377866282619, image: "https://www.westcorkmusic.ie/wp-content/uploads/2024/08/DSC_1827.jpg" },
       { name: "Bantry Christian Fellowship Church", lat: 51.67990, lng: -9.45608, image: "https://www.westcorkmusic.ie/wp-content/uploads/2026/02/Christian-Fellowship-church-2026-KD-low-res-scaled.jpg" },
       { name: "Bantry Bookshop", lat: 51.67969046251881, lng: -9.452045862683947, image: "https://di262mgurvkjm.cloudfront.net/01963c33-e981-730a-87c4-58ec197f5703/Bantry_west_cork_literary_2025_KD_-4_bigthumb.jpg" },
-	  { name: "Whiddy Island", lat: 51.68816647156622, lng: -9.491943915558602, image: "https://www.westcorkmusic.ie/wp-content/uploads/2026/04/MOT_22.08.2025_KD-22_xgaplus.jpg" },
-	  { name: "Cork County Council, (Courthouse)", lat: 51.68113143041356, lng: -9.45383702947407, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/11/venue-courthouse.jpg" },
+      { name: "Whiddy Island", lat: 51.68816647156622, lng: -9.491943915558602, image: "https://www.westcorkmusic.ie/wp-content/uploads/2026/04/MOT_22.08.2025_KD-22_xgaplus.jpg" },
+      { name: "Cork County Council, (Courthouse)", lat: 51.68113143041356, lng: -9.45383702947407, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/11/venue-courthouse.jpg" },
       { name: "West Cork Music Box Office [BOX OFFICE]", lat: 51.68400, lng: -9.44900, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/11/wcm-office-2024.jpg" }
     ]
   }
@@ -317,8 +426,16 @@ function loadFestival(key) {
   const data = festivalData[key];
   
   // Update header styling
-  document.getElementById("list-header").style.backgroundImage = `url(${data.image})`;
+  const headerEl = document.getElementById("list-header");
+  headerEl.style.backgroundImage = `url(${data.image})`;
   document.getElementById("festival-logo").src = data.logo;
+  
+  // Toggle literary blur gradient mode
+  if (key === "literary") {
+    headerEl.classList.add("literary-mode");
+  } else {
+    headerEl.classList.remove("literary-mode");
+  }
   
   // Update font class and title
   const titleEl = document.getElementById("header-title");
@@ -331,18 +448,17 @@ function loadFestival(key) {
   extraMarkers.forEach(m => map.removeLayer(m));
   extraMarkers = [];
   
-  // Reset extra venues button
+  // Reset extra venues button state
   showingExtra = false;
-  const extraBtn = document.getElementById("extra-venues-btn");
-  extraBtn.textContent = "+ Show Fringe Venues";
-  extraBtn.classList.remove("active");
+  const fringeBtn = document.getElementById("map-fringe-btn");
+  fringeBtn.textContent = "+ Show Fringe Venues";
+  fringeBtn.classList.remove("active");
   
-  // Show/hide secondary button based on festival
-  const secondaryContainer = document.getElementById("secondary-buttons");
+  // Show/hide map fringe button based on festival
   if (key === "chamber" && data.extraLocations) {
-    secondaryContainer.classList.add("visible");
+    fringeBtn.classList.add("visible");
   } else {
-    secondaryContainer.classList.remove("visible");
+    fringeBtn.classList.remove("visible");
   }
   
   // Update active state on main buttons
@@ -392,7 +508,7 @@ function toggleExtraVenues() {
   if (!data.extraLocations) return;
   
   showingExtra = !showingExtra;
-  const btn = document.getElementById("extra-venues-btn");
+  const btn = document.getElementById("map-fringe-btn");
   const list = document.getElementById("list");
   
   if (showingExtra) {
@@ -458,7 +574,7 @@ document.querySelectorAll("#festival-buttons button").forEach(btn => {
   btn.onclick = () => loadFestival(btn.dataset.festival);
 });
 
-document.getElementById("extra-venues-btn").onclick = toggleExtraVenues;
+document.getElementById("map-fringe-btn").onclick = toggleExtraVenues;
 
 // Initialize
 loadFestival("chamber");

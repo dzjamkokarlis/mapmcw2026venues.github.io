@@ -47,7 +47,7 @@ const festivalData = {
 
   masters: {
     name: "Masters of Tradition",
-    image: "https://www.westcorkmusic.ie/wp-content/uploads/2026/01/WCM-Website-banners-3.jpg",
+    image: "https://www.westcorkmusic.ie/wp-content/uploads/2026/05/Bantry_mot_2024.jpg",
     logo: "https://www.westcorkmusic.ie/wp-content/uploads/2024/04/MOT-Logo-2024-158-px-x-70-px.png",
     locations: [
       { name: "St. Brendan's Church", lat: 51.68093, lng: -9.45309, image: placeholderImage },

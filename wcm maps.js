@@ -73,16 +73,24 @@ function applyDesignSettings(rows) {
 }
 
 /* ========================= LOAD DATA FROM GOOGLE SHEETS ========================= */
-function fetchCSV(url) {
-  return new Promise((resolve, reject) => {
-    Papa.parse(url, {
-      download: true,
-      header: true,
-      skipEmptyLines: true,
-      complete: results => resolve(results.data),
-      error: reject
-    });
+async function fetchCSV(url) {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`CSV request failed (${response.status} ${response.statusText})`);
+  }
+
+  const csvText = await response.text();
+  const results = Papa.parse(csvText, {
+    header: true,
+    skipEmptyLines: true
   });
+
+  if (results.errors.length) {
+    const firstError = results.errors[0];
+    throw new Error(`CSV parsing failed: ${firstError.message}`);
+  }
+
+  return results.data;
 }
 
 async function loadData() {
@@ -147,8 +155,12 @@ async function loadData() {
     initMap(festivalData, order);
 
   } catch (err) {
-    console.error(err);
-    list.innerHTML = '<div class="status-msg status-error">Couldn\u2019t load venue data. Make sure the Google Sheet is published to the web and the links in script.js are correct.</div>';
+    console.error("Couldn’t load festival map data:", err);
+    list.innerHTML = "";
+    const message = document.createElement("div");
+    message.className = "status-msg status-error";
+    message.textContent = `Couldn’t load venue data. Check that the Google Sheet is published and its links are correct. Details: ${err.message || err}`;
+    list.appendChild(message);
   }
 }
 

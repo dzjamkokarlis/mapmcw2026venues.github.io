@@ -1,30 +1,16 @@
-/* =========================================================================
-   THEME VARIABLES
-   These defaults reproduce the site's original look exactly. They only
-   change if you set up the optional "Design" tab in the Google Sheet —
-   see SETUP-GUIDE.md, Part 3. Nothing here changes on its own.
-   ========================================================================= */
-:root {
-  --accent-color: #ff6b6b;
-  --list-bg: #f4f1ed;
-  --radius-base: 4px;
-  --overlay-opacity: 0.4;
-  --list-font: Arial, sans-serif;
-}
-
-/* Map container - needed for absolute positioning of the fringe button */
+/* Map container - needed for absolute positioning of fringe button */
 #map {
-  width: 67%;
+  width: 70%;
   position: relative;
 }
 
-/* "Show more venues" button - top right corner of the map */
+/* Map Fringe Button - Top Right Corner */
 #map-fringe-btn {
   position: absolute;
   top: 10px;
   right: 10px;
   z-index: 1000;
-  background: var(--accent-color);
+  background: #ff6b6b;
   border: 2px solid #fff;
   color: white;
   padding: 8px 16px;
@@ -34,27 +20,31 @@
   font-size: 0.85rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   transition: all 0.2s;
-  display: none; /* hidden until JS shows it, if the festival has fringe venues */
+  display: none; /* Hidden by default, shown via JS for chamber */
 }
-#map-fringe-btn.visible { display: block; }
+
+#map-fringe-btn.visible {
+  display: block;
+}
+
 #map-fringe-btn.active {
-  filter: brightness(0.92);
+  background: #ff4757;
   box-shadow: 0 0 15px rgba(255, 107, 107, 0.6);
 }
+
 #map-fringe-btn:hover {
-  filter: brightness(0.96);
+  background: #ff5252;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.4);
 }
 
-/* Header - fixed height */
-#list-header {
-  position: relative;
-  background-size: cover;
-  background-position: center;
-  background-color: #333; /* shows while the banner image loads, or if left blank */
-  color: white;
-  padding: 12px 16px;
+/* Header - FIXED HEIGHT */
+#list-header { 
+  position: relative; 
+  background-size: cover; 
+  background-position: center; 
+  color: white; 
+  padding: 12px 16px; 
   flex-shrink: 0;
   height: 160px;
   display: flex;
@@ -62,17 +52,22 @@
   box-sizing: border-box;
   overflow: hidden;
 }
-#list-header::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.4); /* fallback for older browsers */
-  background: rgb(0 0 0 / var(--overlay-opacity));
+#list-header::before { 
+  content: ""; 
+  position: absolute; 
+  inset: 0; 
+  background: rgba(0,0,0,0.4); 
 }
-#list-header * { position: relative; z-index: 1; }
+#list-header * { 
+  position: relative; 
+  z-index: 1; 
+}
 
-/* "Modern" style preset: blurred gradient effect instead of a flat overlay */
-#list-header.literary-mode::before { background: rgba(0,0,0,0.15); }
+/* Literary Festival Blur Gradient Effect */
+#list-header.literary-mode::before {
+  background: rgba(0,0,0,0.15);
+}
+
 #list-header.literary-mode::after {
   content: "";
   position: absolute;
@@ -85,24 +80,44 @@
   z-index: 0;
 }
 
-/* Top section: title + logo side by side */
-#header-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+/* Top section: Title + Logo side by side */
+#header-top { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: flex-start; 
   gap: 12px;
   margin-bottom: 8px;
   flex-shrink: 0;
 }
-#title-section { flex: 1; display: flex; flex-direction: column; gap: 2px; }
-#logo-slot { width: 100px; height: 50px; flex-shrink: 0; }
-#logo-slot img { max-width: 100%; max-height: 100%; object-fit: contain; }
+#title-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+#logo-slot { 
+  width: 100px; 
+  height: 50px; 
+  flex-shrink: 0; 
+}
+#logo-slot img { 
+  max-width: 100%; 
+  max-height: 100%; 
+  object-fit: contain; 
+}
 
-/* Style presets, chosen per-festival via the "Style" column in the Festivals tab */
-.font-style-elegant     { font-family: "Gill Sans", "Gill Sans MT", Calibri, sans-serif; font-weight: 400; }
-.font-style-traditional { font-family: "Clarendon BT", "Clarendon", "Rockwell", "Courier New", serif; font-weight: 90; }
-.font-style-modern      { font-family: "Museo Cyrillic", "Museo", "Open Sans", "Trebuchet MS", sans-serif; font-weight: 500; }
-.font-style-default     { font-family: Arial, sans-serif; font-weight: 600; }
+/* Festival-specific font classes */
+.font-chamber { 
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, sans-serif; 
+}
+.font-masters { 
+  font-family: "Clarendon BT", "Clarendon", "Rockwell", "Courier New", serif; 
+  font-weight: 700; 
+}
+.font-literary { 
+  font-family: "Museo Cyrillic", "Museo", "Open Sans", "Trebuchet MS", sans-serif; 
+  font-weight: 500; 
+}
 
 #header-title {
   margin: 0;
@@ -118,57 +133,146 @@
   letter-spacing: 0.5px;
 }
 
-/* Button containers - bottom of header */
-#button-container { display: flex; flex-direction: column; gap: 6px; margin-top: auto; flex-shrink: 0; }
-#festival-buttons { display: flex; flex-wrap: wrap; gap: 5px; }
-#festival-buttons button {
-  background: rgba(255,255,255,0.25);
-  border: 1px solid rgba(255,255,255,0.5);
-  color: white;
-  padding: 1px 4px;
-  border-radius: var(--radius-base);
-  cursor: pointer;
+/* Button containers - positioned at bottom */
+#button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+#festival-buttons { 
+  display: flex; 
+  flex-wrap: wrap;
+  gap: 5px; 
+}
+#festival-buttons button { 
+  background: rgba(255,255,255,0.25); 
+  border: 1px solid rgba(255,255,255,0.5); 
+  color: white; 
+  padding: 1px 4px; 
+  border-radius: 4px; 
+  cursor: pointer; 
   font-size: 0.8rem;
   transition: all 0.2s;
   white-space: nowrap;
 }
-#festival-buttons button:hover { background: rgba(255,255,255,0.35); }
-#festival-buttons button.active { background: rgba(255,255,255,0.6); border-color: white; font-weight: bold; color: #222; }
+#festival-buttons button:hover {
+  background: rgba(255,255,255,0.35);
+}
+#festival-buttons button.active { 
+  background: rgba(255,255,255,0.6); 
+  border-color: white; 
+  font-weight: bold; 
+  color: #222;
+}
+
+/* REMOVED: Old secondary-buttons styles (fringe button now on map) */
 
 /* List panel */
-#list-panel { width: 33%; box-sizing: border-box; display: flex; flex-direction: column; background: var(--list-bg); border-left: 1px solid #ccc; }
-#list { flex: 1; overflow-y: auto; padding: 10px; font-family: var(--list-font); }
-
-/* Status messages (loading / error) shown in the list panel */
-.status-msg { padding: 20px; color: #666; font-size: 0.9rem; line-height: 1.4; }
-.status-error { color: #b00020; }
+#list-panel { 
+  width: 33%; 
+  display: flex; 
+  flex-direction: column; 
+  background: #f4f1ed; 
+  border-left: 1px solid #ccc; 
+}
+#list { 
+  flex: 1; 
+  overflow-y: auto; 
+  padding: 10px; 
+}
 
 /* Location items */
-.location { padding: 12px; border-bottom: 1px solid #ddd; cursor: pointer; transition: background 0.2s; }
-.location:hover { background: #e8e3ef; }
-.location.box-office { background: #fff3cd; border-left: 5px solid #d39e00; font-weight: 600; }
-.location.fringe-venue { background: #ffe0e0; border-left: 5px solid var(--accent-color); color: #333; }
-.location.fringe-venue:hover { background: #ffd0d0; }
+.location { 
+  padding: 12px; 
+  border-bottom: 1px solid #ddd; 
+  cursor: pointer; 
+  transition: background 0.2s; 
+}
+.location:hover { 
+  background: #e8e3ef; 
+}
+.location.box-office { 
+  background: #fff3cd; 
+  border-left: 5px solid #d39e00; 
+  font-weight: 600; 
+}
+.location.fringe-venue { 
+  background: #ffe0e0; 
+  border-left: 5px solid #ff6b6b; 
+  color: #333;
+}
+.location.fringe-venue:hover { 
+  background: #ffd0d0; 
+}
 
 /* Popup styles */
-.popup img { width: 100%; margin-top: 8px; border-radius: var(--radius-base); cursor: pointer; }
-.popup a { display: inline-block; margin-top: 6px; color: #1a73e8; font-weight: bold; text-decoration: none; }
+.popup img { 
+  width: 100%; 
+  margin-top: 8px; 
+  border-radius: 4px; 
+  cursor: pointer; 
+}
+.popup a { 
+  display: inline-block; 
+  margin-top: 6px; 
+  color: #1a73e8; 
+  font-weight: bold; 
+  text-decoration: none; 
+}
 
 /* Base body styles */
-body { display: flex; height: 100vh; margin: 0; font-family: Arial, sans-serif; }
+body { 
+  display: flex; 
+  height: 100vh; 
+  margin: 0; 
+  font-family: Arial, sans-serif; 
+}
 
-/* Responsive adjustments - matches the iframe breakpoint of 868px on westcorkmusic.ie */
+/* Responsive adjustments - matches iframe breakpoint of 868px */
 @media (max-width: 868px) {
-  body { flex-direction: column; }
-  #map { width: 100%; height: 45vh; }
-  #list-panel { width: 100%; height: 55vh; border-left: none; border-top: 1px solid #ccc; }
-
-  #list-header { height: 130px; padding: 10px 12px; }
-  #header-title { font-size: 1rem; }
-  #header-subtitle { font-size: 0.8rem; }
-  #logo-slot { width: 80px; height: 40px; }
-
-  #festival-buttons button { padding: 2px 6px; font-size: 0.75rem; }
-
-  #map-fringe-btn { padding: 6px 12px; font-size: 0.8rem; top: 8px; right: 8px; }
+  body { 
+    flex-direction: column; 
+  }
+  #map { 
+    width: 100%; 
+    height: 45vh; /* Adjusted for 90vh iframe */
+  }
+  #list-panel { 
+    width: 100%; 
+    height: 45vh; /* Adjusted for 90vh iframe */
+    border-left: none; 
+    border-top: 1px solid #ccc; 
+  }
+  
+  /* Mobile: Compact header */
+  #list-header {
+    height: 130px;
+    padding: 10px 12px;
+  }
+  #header-title { 
+    font-size: 1rem; 
+  }
+  #header-subtitle { 
+    font-size: 0.8rem; 
+  }
+  #logo-slot { 
+    width: 80px; 
+    height: 40px; 
+  }
+  
+  #festival-buttons button {
+    padding: 2px 6px;
+    font-size: 0.75rem;
+  }
+  
+  /* Mobile: Map fringe button adjustments */
+  #map-fringe-btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    top: 8px;
+    right: 8px;
+  }
 }

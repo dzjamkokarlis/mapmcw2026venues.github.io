@@ -127,7 +127,7 @@ async function loadData() {
 
       const lat = parseFloat(row["Latitude"]);
       const lng = parseFloat(row["Longitude"]);
-      if (isNaN(lat) || isNaN(lng)) return; // skip rows with missing/broken coordinates rather than crash
+      if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) return;
 
       const loc = {
         name: (row["Venue Name"] || "Untitled venue").trim(),
@@ -176,13 +176,27 @@ function initMap(festivalData, festivalOrder) {
     buttonsContainer.appendChild(btn);
   });
 
-  function popupHTML(loc) {
-    const link = `https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}`;
-    return `<div class="popup">
-      <strong>${loc.name}</strong><br>
-      <img src="${loc.image}" data-img="${loc.image}">
-      <a href="${link}" target="_blank">\uD83D\uDCCD Get directions</a>
-    </div>`;
+  function popupContent(loc) {
+    const popup = document.createElement("div");
+    popup.className = "popup";
+
+    const name = document.createElement("strong");
+    name.textContent = loc.name;
+    popup.append(name, document.createElement("br"));
+
+    const image = document.createElement("img");
+    image.src = loc.image;
+    image.dataset.img = loc.image;
+    image.alt = loc.name;
+    popup.appendChild(image);
+
+    const link = document.createElement("a");
+    link.href = `https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}`;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = "📍 Get directions";
+    popup.appendChild(link);
+    return popup;
   }
 
   function bindPopupClick(marker) {
@@ -236,7 +250,7 @@ function initMap(festivalData, festivalOrder) {
     const bounds = L.latLngBounds([]);
 
     data.locations.forEach(loc => {
-      const marker = L.marker([loc.lat, loc.lng]).addTo(map).bindPopup(popupHTML(loc));
+      const marker = L.marker([loc.lat, loc.lng]).addTo(map).bindPopup(popupContent(loc));
       bindPopupClick(marker);
       markers.push(marker);
       bounds.extend([loc.lat, loc.lng]);
@@ -270,7 +284,7 @@ function initMap(festivalData, festivalOrder) {
       data.extraLocations.forEach(loc => {
         const marker = L.circleMarker([loc.lat, loc.lng], {
           radius: 9, fillColor: "#ff6b6b", color: "#fff", weight: 2, opacity: 1, fillOpacity: 0.8
-        }).addTo(map).bindPopup(popupHTML(loc));
+        }).addTo(map).bindPopup(popupContent(loc));
         bindPopupClick(marker);
 
         extraMarkers.push(marker);

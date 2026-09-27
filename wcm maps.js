@@ -1,265 +1,302 @@
-/* ========================= CLIPBOARD HELPER ========================= */
-function copyToClipboard(text) {
-  if (!navigator.clipboard) return;
-  navigator.clipboard.writeText(text);
-}
+/* =========================================================================
+   FESTIVAL MAP — DATA-DRIVEN VERSION
+   ---------------------------------------------------------------------
+   All venue names, coordinates, photos, banners, logos and text now
+   live in a Google Sheet, NOT in this file. This file only needs to be
+   touched once, to paste in the two links below. After that, anyone
+   can add/edit venues or festivals just by editing the spreadsheet.
 
-/* ========================= DATA ========================= */
+   See SETUP-GUIDE.md for exactly how to set up the sheet.
+   ========================================================================= */
+
+const FESTIVALS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRGCDsfhVfMyk5U3FUesY6toydaDxLjR5CgsNI_q8wkWj-JGCFA_H0bfSz6WLmP8zo61Wzco03MQX4E/pub?gid=993030145&single=true&output=csv";
+const VENUES_CSV_URL    = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRGCDsfhVfMyk5U3FUesY6toydaDxLjR5CgsNI_q8wkWj-JGCFA_H0bfSz6WLmP8zo61Wzco03MQX4E/pub?gid=992720456&single=true&output=csv";
+
+/* Optional. Leave as-is to keep the site's original look untouched.
+   Only fill this in if you've set up the "Design" tab described in
+   SETUP-GUIDE.md, Part 3, and want to control colors/fonts from the sheet. */
+const DESIGN_CSV_URL = "";
+
+/* ========================================================================= */
+/* Nothing below this line needs to be edited to update map content.         */
+/* ========================================================================= */
+
 const placeholderImage = "https://via.placeholder.com/400x250?text=Venue+Image";
 
-/* ===== OUTREACH LOCATIONS (CHAMBER ONLY) ===== */
-const outreachLocations = [
-  { name: "Two Green Shoots", lat: 51.685, lng: -9.448 },
-  { name: "Wild Atlantic Glamping", lat: 51.72, lng: -9.55 },
-  { name: "Bantry Market (every Friday)", lat: 51.681, lng: -9.453 },
-  { name: "West Cork Arts Centre", lat: 51.6818, lng: -9.4524 },
-  { name: "Philips' Green", lat: 51.6822, lng: -9.4508 },
-  { name: "The Maritime Hotel", lat: 51.68014, lng: -9.45727 },
-  { name: "Whiddy Island", lat: 51.693, lng: -9.498 },
-  { name: "Arundels By The Pier", lat: 51.6831, lng: -9.4455 },
-  { name: "Amar's Cafe & Wine Bar", lat: 51.6813, lng: -9.4516 },
-  { name: "Levis Corner House", lat: 51.6811, lng: -9.4529 },
-  { name: "Heir Island", lat: 51.47, lng: -9.57 },
-  { name: "Sherkin Island Public Library", lat: 51.469, lng: -9.42 },
-  { name: "Cork Airport", lat: 51.8413, lng: -8.4911 }
-];
+function copyToClipboard(text) {
+  if (!navigator.clipboard) return;
+  navigator.clipboard.writeText(text).then(() => alert("Image address copied"));
+}
 
-/* ===== FESTIVAL DATA ===== */
-const festivalData = {
-  chamber: {
-    name: "West Cork Chamber Music Festival",
-    image: "https://www.westcorkmusic.ie/wp-content/uploads/2026/01/music.jpg",
-    logo: "https://www.westcorkmusic.ie/wp-content/uploads/2024/04/WCCMF-Logo-2024-158-px-x-70-px-2.png",
-    locations: [
-      { name: "St Brendans National School Bantry", lat: 51.68151, lng: -9.45476, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/11/venue-stbrendans-school.jpg" },
-      { name: "St. Brendan's Church", lat: 51.68093, lng: -9.45309, image: "https://www.westcorkmusic.ie/wp-content/uploads/2024/09/CS-Prog-2024-Uber-Menu.jpg" },
-      { name: "Cork County Council, (Courthouse)", lat: 51.68113, lng: -9.45384, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/11/venue-courthouse.jpg" },
-      { name: "Bantry Christian Fellowship Church", lat: 51.67990, lng: -9.45608, image: "https://www.westcorkmusic.ie/wp-content/uploads/2026/02/Christian-Fellowship-church-2026-KD-low-res-scaled.jpg" },
-      { name: "Bantry pier", lat: 51.68069, lng: -9.46204, image: placeholderImage },
-      { name: "Bantry Tourist Information Office", lat: 51.68023, lng: -9.45206, image: "https://di262mgurvkjm.cloudfront.net/01980b2b-c294-71cd-bffb-a18eee038ced/REPRO_FREE_Bantry_wclf_14.07.2025_KD__xgaplus.jpg" },
-      { name: "The Brick Oven, Bantry", lat: 51.68040, lng: -9.45508, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/11/venue-the-brick-oven-1.jpg" },
-      { name: "The Maritime Hotel, Bantry", lat: 51.68014, lng: -9.45727, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/11/venue-maritime-hotel-1.jpg" },
-      { name: "Bantry House", lat: 51.67751, lng: -9.46438, image: "https://www.westcorkmusic.ie/wp-content/uploads/2019/03/Bantry-House-Gardens.jpg" },
-      { name: "Marino Church, Bantry", lat: 51.68054, lng: -9.45178, image: "https://www.westcorkmusic.ie/wp-content/uploads/2022/08/Marino-Old-Methodist-Church.jpg" },
-      { name: "West Cork Music Box Office [BOX OFFICE]", lat: 51.68051, lng: -9.44856, image: "https://www.westcorkmusic.ie/wp-content/uploads/2018/11/wcm-office-2024.jpg" }
-    ]
-  },
+/* Friendly style presets so the spreadsheet never needs raw CSS/font names.
+   Leave the "Style" column blank in the Festivals sheet for a plain default. */
+const STYLE_PRESETS = {
+  elegant:     { fontClass: "font-style-elegant",     blurMode: false },
+  traditional: { fontClass: "font-style-traditional", blurMode: false },
+  modern:      { fontClass: "font-style-modern",      blurMode: true  }
+};
+function resolveStyle(styleName) {
+  const key = (styleName || "").trim().toLowerCase();
+  return STYLE_PRESETS[key] || { fontClass: "font-style-default", blurMode: false };
+}
 
-  masters: {
-    name: "Masters of Tradition",
-    image: "https://www.westcorkmusic.ie/wp-content/uploads/2026/05/Bantry_mot_2024.jpg",
-    logo: "https://www.westcorkmusic.ie/wp-content/uploads/2024/04/MOT-Logo-2024-158-px-x-70-px.png",
-    locations: [
-      { name: "St. Brendan's Church", lat: 51.68093, lng: -9.45309, image: placeholderImage },
-      { name: "Bantry House", lat: 51.67751, lng: -9.46438, image: placeholderImage },
-      { name: "Maritime Hotel, Bantry", lat: 51.68014, lng: -9.45727, image: placeholderImage },
-      { name: "Marino Church, Bantry", lat: 51.68054, lng: -9.45178, image: placeholderImage },
-      { name: "Bantry Pier", lat: 51.68069, lng: -9.46204, image: placeholderImage },
-      { name: "Future Forests", lat: 51.787, lng: -9.473, image: placeholderImage },
-      { name: "West Cork Music Box Office [BOX OFFICE]", lat: 51.684, lng: -9.449, image: placeholderImage }
-    ]
-  },
-
-  literary: {
-    name: "West Cork Literary Festival",
-    image: "https://www.westcorkmusic.ie/wp-content/uploads/2024/09/DSC_7560-scaled-1200x483.jpg",
-    logo: "https://www.westcorkmusic.ie/wp-content/uploads/2025/04/WCLF-Header-Logo-for-Website-158px-x-70px.png",
-    locations: [
-      { name: "Bantry Pier", lat: 51.68069, lng: -9.46204, image: placeholderImage },
-      { name: "Abbey Strand, Bantry (Festival Swim)", lat: 51.67728, lng: -9.47165, image: placeholderImage },
-      { name: "Bantry House", lat: 51.67751, lng: -9.46438, image: placeholderImage },
-      { name: "Maritime Hotel, Bantry", lat: 51.68021, lng: -9.45719, image: placeholderImage },
-      { name: "St Brendans National School Bantry", lat: 51.68145, lng: -9.45460, image: placeholderImage },
-      { name: "National Learning Network, Bantry", lat: 51.69961, lng: -9.44203, image: placeholderImage },
-      { name: "Future Forests", lat: 51.787, lng: -9.473, image: placeholderImage },
-      { name: "Marino Church, Bantry", lat: 51.68055, lng: -9.45187, image: placeholderImage },
-      { name: "Ma Murphy's Bar, Bantry", lat: 51.67947, lng: -9.45086, image: placeholderImage },
-      { name: "Bantry Library", lat: 51.67850, lng: -9.44938, image: placeholderImage },
-      { name: "St Finbarr's Boys School, Bantry", lat: 51.67694, lng: -9.44104, image: placeholderImage },
-      { name: "Bantry Bookshop", lat: 51.67969, lng: -9.45205, image: placeholderImage },
-      { name: "West Cork Music Box Office [BOX OFFICE]", lat: 51.684, lng: -9.449, image: placeholderImage }
-    ]
-  }
+/* Friendly names for the optional "Design" tab, mapped to real CSS values.
+   Matches the presets shown in theme-editor.html. */
+const RADIUS_PRESETS = { sharp: "2px", soft: "6px", round: "14px" };
+const OVERLAY_PRESETS = { light: "0.15", medium: "0.4", dark: "0.65" };
+const FONT_PRESETS = {
+  classic: "Arial, sans-serif",
+  modern: '"Open Sans", Arial, sans-serif',
+  rounded: "Verdana, Geneva, sans-serif"
 };
 
-/* ========================= MAP ========================= */
-const map = L.map("map").setView([51.68, -9.45], 13);
-
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution: "© OpenStreetMap contributors"
-}).addTo(map);
-
-let markers = [];
-let outreachMarkers = [];
-let outreachVisible = false;
-let currentFestival = null;
-
-/* ===== ICONS ===== */
-const outreachIcon = L.icon({
-  iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41]
-});
-
-/* ========================= POPUP ========================= */
-function popupHTML(loc) {
-  return `
-    <div class="popup">
-      <strong>${loc.name}</strong><br>
-      <a target="_blank" href="https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}">
-        📍 Get directions
-      </a>
-    </div>
-  `;
-}
-
-/* ========================= LOAD FESTIVAL ========================= */
-function loadFestival(key) {
-  currentFestival = key;
-  outreachVisible = false;
-  
-  // Clear existing markers
-  markers.forEach(m => map.removeLayer(m));
-  markers = [];
-  outreachMarkers.forEach(m => map.removeLayer(m));
-  outreachMarkers = [];
-
-  const data = festivalData[key];
-
-  // Update header
-  document.getElementById("festival-logo").src = data.logo;
-  document.getElementById("header-title").textContent = data.name;
-  document.getElementById("header-subtitle").textContent = "2026 Festival Venues";
-  
-  // === UPDATED: Store header element and toggle literary blur mode ===
-  const headerEl = document.getElementById("list-header");
-  headerEl.style.backgroundImage = `url(${data.image})`;
-  
-  // Toggle literary blur gradient effect
-  if (key === "literary") {
-    headerEl.classList.add("literary-mode");
-  } else {
-    headerEl.classList.remove("literary-mode");
-  }
-  // === END UPDATE ===
-
-  // Clear and rebuild secondary buttons container
-  const secondaryContainer = document.getElementById("secondary-buttons");
-  if (secondaryContainer) {
-    secondaryContainer.innerHTML = '';
-  } else {
-    // Create secondary buttons container if it doesn't exist
-    const btnContainer = document.getElementById('button-container');
-    const newSecondary = document.createElement('div');
-    newSecondary.id = 'secondary-buttons';
-    btnContainer.appendChild(newSecondary);
-  }
-
-  // Show outreach button only for chamber
-  if (key === "chamber") {
-    createOutreachButton();
-  }
-
-  // Update active state on main buttons
-  document.querySelectorAll("#festival-buttons button").forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.festival === key);
+function applyDesignSettings(rows) {
+  const settings = {};
+  rows.forEach(row => {
+    const key = (row["Setting"] || "").trim();
+    const val = (row["Value"] || "").trim();
+    if (key) settings[key] = val;
   });
 
-  // Populate list
+  const root = document.documentElement.style;
+  if (settings["Accent Color"]) root.setProperty("--accent-color", settings["Accent Color"]);
+  if (settings["List Background Color"]) root.setProperty("--list-bg", settings["List Background Color"]);
+
+  const radiusKey = (settings["Corner Roundness"] || "").toLowerCase();
+  if (RADIUS_PRESETS[radiusKey]) root.setProperty("--radius-base", RADIUS_PRESETS[radiusKey]);
+
+  const overlayKey = (settings["Banner Overlay"] || "").toLowerCase();
+  if (OVERLAY_PRESETS[overlayKey]) root.setProperty("--overlay-opacity", OVERLAY_PRESETS[overlayKey]);
+
+  const fontKey = (settings["List Font"] || "").toLowerCase();
+  if (FONT_PRESETS[fontKey]) root.setProperty("--list-font", FONT_PRESETS[fontKey]);
+}
+
+/* ========================= LOAD DATA FROM GOOGLE SHEETS ========================= */
+function fetchCSV(url) {
+  return new Promise((resolve, reject) => {
+    Papa.parse(url, {
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      complete: results => resolve(results.data),
+      error: reject
+    });
+  });
+}
+
+async function loadData() {
   const list = document.getElementById("list");
-  list.innerHTML = "";
+  list.innerHTML = '<div class="status-msg">Loading venues&hellip;</div>';
 
-  const bounds = L.latLngBounds([]);
+  if (FESTIVALS_CSV_URL.startsWith("PASTE_") || VENUES_CSV_URL.startsWith("PASTE_")) {
+    list.innerHTML = '<div class="status-msg status-error">The Google Sheet links haven\u2019t been set up yet in script.js. See SETUP-GUIDE.md.</div>';
+    return;
+  }
 
-  data.locations.forEach(loc => {
-    const marker = L.marker([loc.lat, loc.lng])
-      .addTo(map)
-      .bindPopup(popupHTML(loc));
+  try {
+    const fetches = [fetchCSV(FESTIVALS_CSV_URL), fetchCSV(VENUES_CSV_URL)];
+    if (DESIGN_CSV_URL) fetches.push(fetchCSV(DESIGN_CSV_URL));
 
-    markers.push(marker);
-    bounds.extend([loc.lat, loc.lng]);
+    const [festivalRows, venueRows, designRows] = await Promise.all(fetches);
 
-    const item = document.createElement("div");
-    item.className = "location";
-    item.textContent = loc.name;
+    if (designRows) applyDesignSettings(designRows);
 
-    if (loc.name.toUpperCase().includes("BOX OFFICE")) {
-      item.classList.add("box-office");
+    const festivalData = {};
+    const order = [];
+
+    festivalRows.forEach(row => {
+      const key = (row["Key"] || "").trim();
+      if (!key) return;
+      order.push(key);
+      festivalData[key] = {
+        name: row["Display Name"] || key,
+        subtitle: row["Subtitle"] || "",
+        image: (row["Banner Image URL"] || "").trim(),
+        logo: (row["Logo URL"] || "").trim(),
+        style: resolveStyle(row["Style"]),
+        locations: [],
+        extraLocations: []
+      };
+    });
+
+    venueRows.forEach(row => {
+      const key = (row["Festival Key"] || "").trim();
+      const fest = festivalData[key];
+      if (!fest) return; // row's Festival Key doesn't match any row in the Festivals tab — skip it
+
+      const lat = parseFloat(row["Latitude"]);
+      const lng = parseFloat(row["Longitude"]);
+      if (isNaN(lat) || isNaN(lng)) return; // skip rows with missing/broken coordinates rather than crash
+
+      const loc = {
+        name: (row["Venue Name"] || "Untitled venue").trim(),
+        lat, lng,
+        image: (row["Image URL"] || "").trim() || placeholderImage
+      };
+
+      const isFringe = (row["Fringe"] || "").trim().toLowerCase() === "yes";
+      (isFringe ? fest.extraLocations : fest.locations).push(loc);
+    });
+
+    if (!order.length) {
+      list.innerHTML = '<div class="status-msg status-error">No festivals found. Check the Festivals tab has a value in the "Key" column.</div>';
+      return;
     }
 
-    item.onclick = () => {
-      map.setView([loc.lat, loc.lng], 15);
-      marker.openPopup();
-    };
+    initMap(festivalData, order);
 
-    list.appendChild(item);
-  });
-
-  map.fitBounds(bounds, { padding: [40, 40] });
+  } catch (err) {
+    console.error(err);
+    list.innerHTML = '<div class="status-msg status-error">Couldn\u2019t load venue data. Make sure the Google Sheet is published to the web and the links in script.js are correct.</div>';
+  }
 }
 
-/* ========================= CREATE OUTREACH BUTTON ========================= */
-function createOutreachButton() {
-  const container = document.getElementById("secondary-buttons");
-  const btn = document.createElement("button");
-  btn.id = "outreach-btn";
-  btn.textContent = "+ Show Outreach Venues";
-  
-  btn.onclick = () => {
-    outreachVisible = !outreachVisible;
+/* ========================= MAP ========================= */
+function initMap(festivalData, festivalOrder) {
+  const map = L.map("map").setView([51.68, -9.45], 13);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "&copy; OpenStreetMap contributors"
+  }).addTo(map);
 
-    if (outreachVisible) {
-      btn.textContent = "− Hide Outreach Venues";
+  let markers = [];
+  let extraMarkers = [];
+  let showingExtra = false;
+  let currentFestival = null;
+
+  // Build the top festival buttons from whatever rows exist in the Festivals tab
+  const buttonsContainer = document.getElementById("festival-buttons");
+  buttonsContainer.innerHTML = "";
+  festivalOrder.forEach((key, i) => {
+    const btn = document.createElement("button");
+    btn.textContent = festivalData[key].name;
+    btn.dataset.festival = key;
+    if (i === 0) btn.classList.add("active");
+    btn.onclick = () => loadFestival(key);
+    buttonsContainer.appendChild(btn);
+  });
+
+  function popupHTML(loc) {
+    const link = `https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}`;
+    return `<div class="popup">
+      <strong>${loc.name}</strong><br>
+      <img src="${loc.image}" data-img="${loc.image}">
+      <a href="${link}" target="_blank">\uD83D\uDCCD Get directions</a>
+    </div>`;
+  }
+
+  function bindPopupClick(marker) {
+    marker.on("popupopen", e => {
+      const img = e.popup.getElement().querySelector("img");
+      if (img) img.onclick = () => copyToClipboard(img.dataset.img);
+    });
+  }
+
+  function loadFestival(key) {
+    currentFestival = key;
+    const data = festivalData[key];
+    if (!data) return;
+
+    const headerEl = document.getElementById("list-header");
+    headerEl.style.backgroundImage = data.image ? `url(${data.image})` : "none";
+
+    const logoImg = document.getElementById("festival-logo");
+    if (data.logo) {
+      logoImg.src = data.logo;
+      logoImg.style.display = "";
+    } else {
+      logoImg.removeAttribute("src");
+      logoImg.style.display = "none";
+    }
+
+    headerEl.classList.toggle("literary-mode", data.style.blurMode);
+
+    const titleEl = document.getElementById("header-title");
+    titleEl.className = data.style.fontClass;
+    titleEl.textContent = data.name;
+    document.getElementById("header-subtitle").textContent = data.subtitle;
+
+    markers.forEach(m => map.removeLayer(m));
+    markers = [];
+    extraMarkers.forEach(m => map.removeLayer(m));
+    extraMarkers = [];
+
+    showingExtra = false;
+    const fringeBtn = document.getElementById("map-fringe-btn");
+    fringeBtn.textContent = "+ Show More Venues";
+    fringeBtn.classList.remove("active");
+    fringeBtn.classList.toggle("visible", data.extraLocations.length > 0);
+
+    document.querySelectorAll("#festival-buttons button").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.festival === key);
+    });
+
+    const list = document.getElementById("list");
+    list.innerHTML = "";
+    const bounds = L.latLngBounds([]);
+
+    data.locations.forEach(loc => {
+      const marker = L.marker([loc.lat, loc.lng]).addTo(map).bindPopup(popupHTML(loc));
+      bindPopupClick(marker);
+      markers.push(marker);
+      bounds.extend([loc.lat, loc.lng]);
+
+      const item = document.createElement("div");
+      item.className = "location";
+      item.textContent = loc.name;
+      if (loc.name.toUpperCase().includes("BOX OFFICE")) item.classList.add("box-office");
+      item.onclick = () => { map.setView([loc.lat, loc.lng], 15); marker.openPopup(); };
+      list.appendChild(item);
+    });
+
+    if (bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40] });
+  }
+
+  function toggleExtraVenues() {
+    const data = festivalData[currentFestival];
+    if (!data || !data.extraLocations.length) return;
+
+    showingExtra = !showingExtra;
+    const btn = document.getElementById("map-fringe-btn");
+    const list = document.getElementById("list");
+
+    if (showingExtra) {
+      btn.textContent = "\u2212 Hide More Venues";
       btn.classList.add("active");
-      
-      const list = document.getElementById("list");
-      
-      outreachLocations.forEach(loc => {
-        // Add marker
-        const m = L.marker([loc.lat, loc.lng], { icon: outreachIcon })
-          .addTo(map)
-          .bindPopup(`<strong>${loc.name}</strong>`);
-        outreachMarkers.push(m);
-        
-        // Add to list with fringe-venue class
+
+      const bounds = L.latLngBounds([]);
+      markers.forEach(m => bounds.extend(m.getLatLng()));
+
+      data.extraLocations.forEach(loc => {
+        const marker = L.circleMarker([loc.lat, loc.lng], {
+          radius: 9, fillColor: "#ff6b6b", color: "#fff", weight: 2, opacity: 1, fillOpacity: 0.8
+        }).addTo(map).bindPopup(popupHTML(loc));
+        bindPopupClick(marker);
+
+        extraMarkers.push(marker);
+        bounds.extend([loc.lat, loc.lng]);
+
         const item = document.createElement("div");
         item.className = "location fringe-venue";
         item.textContent = loc.name;
-        item.onclick = () => {
-          map.setView([loc.lat, loc.lng], 15);
-          m.openPopup();
-        };
+        item.onclick = () => { map.setView([loc.lat, loc.lng], 15); marker.openPopup(); };
         list.appendChild(item);
       });
-      
-      // Refit bounds to include new markers
-      const bounds = L.latLngBounds([]);
-      markers.forEach(m => bounds.extend(m.getLatLng()));
-      outreachMarkers.forEach(m => bounds.extend(m.getLatLng()));
-      map.fitBounds(bounds, { padding: [40, 40] });
-      
-    } else {
-      btn.textContent = "+ Show Outreach Venues";
-      btn.classList.remove("active");
-      
-      // Remove markers
-      outreachMarkers.forEach(m => map.removeLayer(m));
-      outreachMarkers = [];
-      
-      // Remove from list
-      const items = document.querySelectorAll(".location.fringe-venue");
-      items.forEach(item => item.remove());
-    }
-  };
 
-  container.appendChild(btn);
+      if (bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40] });
+    } else {
+      btn.textContent = "+ Show More Venues";
+      btn.classList.remove("active");
+      extraMarkers.forEach(m => map.removeLayer(m));
+      extraMarkers = [];
+      list.querySelectorAll(".fringe-venue").forEach(item => item.remove());
+    }
+  }
+
+  document.getElementById("map-fringe-btn").onclick = toggleExtraVenues;
+
+  loadFestival(festivalOrder[0]);
 }
 
-/* ========================= EVENT LISTENERS ========================= */
-document.querySelectorAll("#festival-buttons button").forEach(btn => {
-  btn.onclick = () => loadFestival(btn.dataset.festival);
-});
-
 /* ========================= INIT ========================= */
-loadFestival("chamber");
+loadData();
